@@ -1,0 +1,9 @@
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - pip
+  - glpk=4.65
+  - matplotlib=3.3.3
+  - pip:
+    - -e ./src
