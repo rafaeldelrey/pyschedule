@@ -1,3 +1,5 @@
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/tpaviot/pyschedule/tut-pyschedule)
+
 # pyschedule
 
 pyschedule is python package to compute resource-constrained task schedules. Some features are: 
