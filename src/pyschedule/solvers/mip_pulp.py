@@ -77,7 +77,7 @@ class MIP(object):
 		ratio_gap = None
 		if 'ratio_gap' in kwarg:
 			ratio_gap = float(kwarg['ratio_gap'])
-		start_time = time.time()
+		start_time = time.perf_counter()
 		# select solver for pl
 		if kind == 'CPLEX':
 			if time_limit is not None:
@@ -120,7 +120,7 @@ class MIP(object):
 			raise Exception('ERROR: solver ' + kind + ' not known')
 
 		if msg:
-			print('INFO: execution time for solving mip (sec) = ' + str(time.time() - start_time))
+			print('INFO: execution time for solving mip (sec) = ' + str(time.perf_counter() - start_time))
 		if self.mip.status == 1 and msg:
 			print('INFO: objective = ' + str(pl.value(self.mip.objective)))
 
