@@ -1,4 +1,8 @@
-# pyschedule
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/8817f1dea5d443b9a7a6046f00c1ce29)](https://app.codacy.com/gh/tpaviot/pyschedule?utm_source=github.com&utm_medium=referral&utm_content=tpaviot/pyschedule&utm_campaign=Badge_Grade)
+[![Azure Build Status](https://dev.azure.com/tpaviot/pyschedule/_apis/build/status/tpaviot.pyschedule?branchName=dev)](https://dev.azure.com/tpaviot/pyschedule/_build?definitionId=8)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/tpaviot/pyschedule/HEAD?filepath=example-notebooks)
+
+# pyschedule (fork of the original project)
 
 pyschedule is python package to compute resource-constrained task schedules. Some features are: 
 
