@@ -264,10 +264,10 @@ def solve(scenario,mod_filename=None,msg=0) :
 	dat_filename, task_to_id, id_to_resource = _get_dat_filename(scenario,msg=msg)
 
 	# run cp-optimizer
-	start_time = time.time()
+	start_time = time.perf_counter()
 	log = os.popen('oplrun %s %s' % (mod_filename, dat_filename) ).read()
 	if msg :
-		print('INFO: execution time (sec) = '+str(time.time()-start_time))
+		print('INFO: execution time (sec) = '+str(time.perf_counter()-start_time))
 
 	# read solution
 	return _read_solution(S,log,task_to_id,id_to_resource,msg=msg)
