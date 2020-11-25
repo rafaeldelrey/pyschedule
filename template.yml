@@ -35,8 +35,9 @@ jobs:
 
   - bash: |
         conda env create -n pyschenv -f environment.yml python=${{ parameters.py_maj }}.${{ parameters.py_min }}
-    displayName: Install pyschedule to a deidcated environment
+    displayName: Install pyschedule to a dedicated environment
     
   - bash: |
-      source activate pyschenv
-    displayName: 'Activate environment and run tests'
+      source activate pyschenv && \
+      python -c "from pyschedule import *"
+    displayName: 'Run tests'

@@ -5,13 +5,6 @@ trigger:
 jobs:
 - template: template.yml
   parameters:
-    name: Ubuntu_18_04_python37
-    vmImage: 'ubuntu-18.04'
-    py_maj: 3
-    py_min: 7
-
-- template: template.yml
-  parameters:
     name: Ubuntu_20_04_python37
     vmImage: 'ubuntu-20.04'
     py_maj: 3
@@ -19,8 +12,8 @@ jobs:
 
 - template: template.yml
   parameters:
-    name: macOS_10_14_python37
-    vmImage: 'macOS-10.14'
+    name: macOS_10_15_python37
+    vmImage: 'macOS-10.15'
     py_maj: 3
     py_min: 7
 
@@ -30,4 +23,46 @@ jobs:
     vmImage: 'windows-2019'
     py_maj: 3
     py_min: 7
-    conda_bld: 3.17
+
+- template: template.yml
+  parameters:
+    name: Ubuntu_20_04_python38
+    vmImage: 'ubuntu-20.04'
+    py_maj: 3
+    py_min: 8
+
+- template: template.yml
+  parameters:
+    name: macOS_10_15_python38
+    vmImage: 'macOS-10.15'
+    py_maj: 3
+    py_min: 8
+
+- template: template.yml
+  parameters:
+    name: Windows_VS2019_python38
+    vmImage: 'windows-2019'
+    py_maj: 3
+    py_min: 8
+
+- template: template.yml
+  parameters:
+    name: Ubuntu_20_04_python39
+    vmImage: 'ubuntu-20.04'
+    py_maj: 3
+    py_min: 9
+
+- template: template.yml
+  parameters:
+    name: macOS_10_15_python39
+    vmImage: 'macOS-10.15'
+    py_maj: 3
+    py_min: 9
+
+- template: template.yml
+  parameters:
+    name: Windows_VS2019_python39
+    vmImage: 'windows-2019'
+    py_maj: 3
+    py_min: 9
+
