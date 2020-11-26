@@ -1,6 +1,3 @@
-#! /usr/bin/python
-from __future__ import print_function
-
 '''
 Copyright 2015 Tim Nonner
 
@@ -27,8 +24,8 @@ python package to formulate and solve resource-constrained scheduling problems
 """
 
 
-
 from collections import OrderedDict as _DICT_TYPE
+from datetime import datetime, timedelta
 import types
 import functools
 import copy
@@ -272,12 +269,42 @@ class Scenario(_SchedElement):
 	"""
 	The base scenario class
 	"""
-	def __init__(self,name='scenario not named',horizon=None):
+	def __init__(self,name='Unnamed',horizon=None,start_time=None,end_time=None,steptime=None, duration=None):
 		_SchedElement.__init__(self,name)
 		self.horizon = horizon
 		self._tasks = _DICT_TYPE() #tasks
 		self._resources = _DICT_TYPE() #resources
 		self._constraints = list()
+
+		# start and end times, should be datetime
+		self.start_time = start_time
+		self.end_time = end_time
+		# the timestep, e.g. 1 hour or 30mn
+		self.steptime = steptime #timedelta(hours=1)
+		# the total duration of the scenario
+		self.duration = duration
+
+	def set_timeinfo_from_start_and_steptime(self, start_time, delta_t):
+		self.start_time = start_time
+		self.steptime = delta_t
+		self.duration = self.horizon * delta_t
+		self.end_time = self.start_time + self.duration
+		print("Start time:", self.start_time)
+		print("End time:", self.end_time)
+		print("Horizon (number of time increments):", self.horizon)
+		print("Step time:", self.steptime)
+
+	def set_timeinfo_from_start_and_end_time_and_time_step(self, start_time, end_time, delta_t):
+		self.start_time = start_time  # for example today
+		self.end_time = end_time  # for example tomorrow at the same hour
+		self.step_time = delta_t  # for example one hour
+		self.horizon = nb_steps  # then horizon should be equal to 24
+		self.duration = self.horizon * delta_t
+		self.end_time = self.start_time + self.duration
+		print("Start time:", self.start_time)
+		print("End time:", self.end_time)
+		print("Horizon (number of time increments):", self.horizon)
+		print("Step time:", self.steptime)
 
 	def Task(self,name,length=1,periods=None,group=None,schedule_cost=None,delay_cost=None,**kwargs) :
 		"""
@@ -1227,7 +1254,7 @@ class _Slice(_SchedElement):
 
 	def __str__(self):
 		param = self._param
-		if self.name is not None and self.name is not '':
+		if self.name is not None and self.name != '':
 			param = self.name
 		slice = ''
 		if self._start is not None or self._end is not None:
