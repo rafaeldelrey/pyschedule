@@ -3,7 +3,9 @@ channels:
   - conda-forge
 dependencies:
   - pip
+  - python=3.8
   - glpk=4.65
   - matplotlib=3.3.3
+  - plotly=4.13.0
   - pip:
     - -e ./src
