@@ -1,4 +1,3 @@
-#! /usr/bin/env python
 '''
 Copyright 2015 Tim Nonner
 
@@ -28,6 +27,5 @@ method "plot" that takes a scenario as minimal input. If the scenario
 has been solved beforehand, then a viualization should be returnd (in some way).
 """
 
-
 from . import matplotlib
-
+from . import plotly
