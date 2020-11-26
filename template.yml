@@ -39,7 +39,17 @@ jobs:
     
   - bash: |
       source activate pyschenv && \
-      python -c "from pyschedule import *" && \
-      python test/simple-test.py && \
+      python -c 'from pyschedule import *' && \
+      python test/simple-test.py
+    displayName: 'Test import and run simple test'
+
+  - bash: |
+      source activate pyschenv && \    
       python test/test-solvers.py
-    displayName: 'Run tests'
+    displayName: 'Test solvers'
+
+  - bash: |
+      source activate pyschenv && \
+      cd examples && \
+      ./run_as_test.sh
+    displayName: 'Run examples as tests'
