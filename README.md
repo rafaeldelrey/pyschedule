@@ -22,15 +22,15 @@ A simple pyschedule scenario where three houshold tasks need to get assigned to 
 from pyschedule import Scenario, solvers, plotters, alt
 
 # the planning horizon has 10 periods
-S = Scenario('household',horizon=10)
+S = Scenario('household', horizon=10)
 
 # two resources: Alice and Bob
 Alice, Bob = S.Resource('Alice'), S.Resource('Bob')
 
 # three tasks: cook, wash, and clean
-cook = S.Task('cook',length=1,delay_cost=1)
-wash = S.Task('wash',length=2,delay_cost=1)
-clean = S.Task('clean',length=3,delay_cost=2)
+cook = S.Task('cook', length=1, delay_cost=1)
+wash = S.Task('wash', length=2, delay_cost=1)
+clean = S.Task('clean', length=3, delay_cost=2)
 
 # every task can be done either by Alice or Bob
 cook += Alice | Bob
@@ -38,7 +38,7 @@ wash += Alice | Bob
 clean += Alice | Bob
 
 # compute and print a schedule
-solvers.mip.solve(S,msg=1)
+solvers.mip.solve(S, msg=True)
 print(S.solution())
 ```
 ```
@@ -54,17 +54,11 @@ plotters.matplotlib.plot(S,img_filename='pics/household.png')
 
 ![png](pics/household.png)
 
-There are example notebooks <a href="https://github.com/timnon/pyschedule/tree/master/example-notebooks">here</a> and simpler examples in the <a href="https://github.com/timnon/pyschedule/tree/master/examples">examples folder</a>. Install it with pip:
-```
-pip install pyschedule
-```
-
-
+There are example notebooks <a href="https://github.com/tpaviot/pyschedule/tree/dev/example-notebooks">here</a> and simpler examples in the <a href="https://github.com/tpaviot/pyschedule/tree/dev/examples">examples folder</a>.
 
 ## Limits
 
 Note that pyschedule aims to be *a general solver for small to medium-sized scheduling problems*. A typical scenario that pyschedule consists of 10 resources and 100 tasks with a planning horizon of 100 periods. If your requirements are much larger than this, then an out-of-the box solution is hard to obtain. There are some ways to speed-up pyschedule (e.g. see task groups and solver parameters). It is also possible to build heuristics on top of pyschedule to solve large-scaled scheduling problems.
-
 
 ## How to start
 
@@ -77,7 +71,7 @@ from pyschedule import Scenario, solvers, plotters, alt
 This allows the creation of a scenario:
 
 ```python
-S = Scenario('hello_world',horizon=10)
+S = Scenario('hello_world', horizon=10)
 ```
 
 This scenario is named `hello_world` and has a time horizon of 10 periods. The granularity of the periods depends on your problem, e.g. a period could be an hour, a week, or a day. However, having far more than 100 periods makes the computation of a schedule quite hard. Some tricks to reduce the number of periods are:
@@ -96,9 +90,10 @@ It is convenient to have identical resource and variable names, like `R`. During
 Next we add a task to the scenario:
 
 ```python
-T = S.Task('T',length=1,delay_cost=1)
+T = S.Task('T', length=1, delay_cost=1)
 ```
-This task has length 1, that is, it requires only 1 period to finish. Since 1 is the default length of a task, we would not have to set this explicitely. Moreover, we set the delay cost to 1, that is, delaying this job for one period increases the *cost* of a schedule by 1, which motivates to finish this task as early as possible.
+
+This task has length 1, that is, it requires only 1 period to finish. Since 1 is the default length of a task, we would not have to set this explicitly. Moreover, we set the delay cost to 1, that is, delaying this job for one period increases the *cost* of a schedule by 1, which motivates to finish this task as early as possible.
 
 We define that task `T` requires resource `R` as follows:
 
@@ -109,7 +104,7 @@ T += R
 Then we compute and print a schedule as follows:
 
 ```python
-solvers.mip.solve(S,msg=0)
+solvers.mip.solve(S, msg=False)
 print(S.solution())
 ```
 
@@ -125,16 +120,15 @@ The output first shows the time required to solve the problem. Also the objectiv
 
 It is not necessary to define cost in a scenario. In this case, a solver will simply try to find a feasible schedule. Not defining any cost will sometimes even speed up the computation. However, in most scenarios, setting at least some delay cost makes sense.
 
-
 ### Delay Cost
 
 We set the delay cost of a task to 1 as follows:
 
 ```python
-T = S.Task('T',delay_cost=1)
+T = S.Task('T', delay_cost=1)
 ```
-This means that if this task is scheduled in period 0, then there will no delay cost, if it is schedule in period 1, there will be total cost 1 and so on. Hence, it makes sense to schedule this task as early as possible. Note that delay cost can also be negative, in which case a task will be *pushed* to the end of a schedule. Also note that a task with a higher delay cost is more likely to be scheduled earlier if there are no other constraints that are preventing this. The default delay cost is `None`.
 
+This means that if this task is scheduled in period 0, then there will no delay cost, if it is schedule in period 1, there will be total cost 1 and so on. Hence, it makes sense to schedule this task as early as possible. Note that delay cost can also be negative, in which case a task will be *pushed* to the end of a schedule. Also note that a task with a higher delay cost is more likely to be scheduled earlier if there are no other constraints that are preventing this. The default delay cost is `None`.
 
 ### Schedule Cost
 
@@ -142,26 +136,27 @@ Schedule cost can be used for optional tasks, that is, we provide some positive 
 
 ```python
 from pyschedule import Scenario, solvers, plotters, alt
-S = Scenario('schedule_cost',horizon=10)
+S = Scenario('schedule_cost', horizon=10)
 R = S.Resource('R')
 
 # not setting a schedule cost will set it to None
-T0 = S.Task('T0',length=2,delay_cost=1)
+T0 = S.Task('T0', length=2, delay_cost=1)
 # setting the schedule cost of T1 to -1
-T1 = S.Task('T1',length=2,delay_cost=1,schedule_cost=-1)
+T1 = S.Task('T1', length=2, delay_cost=1, schedule_cost=-1)
 
 T0 += R
 T1 += R
-solvers.mip.solve(S,msg=1)
+solvers.mip.solve(S, msg=True)
 print(S.solution())
 ```
+
 ```
 INFO: execution time for solving mip (sec) = 0.016648054122924805
 INFO: objective = 0.0
 [(T0, R, 0, 2)]
 ```
-In the schedule above, scheduling task `T1` with schedule cost -1 would decrease the total cost by 1, but then we would have to schedule both tasks `T0` and `T1`, and hence one of them would have to start in period 2. This would result an additional delay cost of 2. Consequently, it makes more sense not to schedule `T1`.
 
+In the schedule above, scheduling task `T1` with schedule cost -1 would decrease the total cost by 1, but then we would have to schedule both tasks `T0` and `T1`, and hence one of them would have to start in period 2. This would result an additional delay cost of 2. Consequently, it makes more sense not to schedule `T1`.
 
 ### Resource Cost
 
@@ -169,23 +164,24 @@ Using a resource for some periods might imply additional resource cost:
 
 ```python
 from pyschedule import Scenario, solvers, plotters, alt
-S = Scenario('resource_cost',horizon=10)
+S = Scenario('resource_cost', horizon=10)
 
 # assign a cost per period of 5
-R = S.Resource('R',cost_per_period=5)
+R = S.Resource('R', cost_per_period=5)
 
-T = S.Task('T',length=2,delay_cost=1)
+T = S.Task('T', length=2, delay_cost=1)
 T += R
-solvers.mip.solve(S,msg=1)
+solvers.mip.solve(S, msg=True)
 print(S.solution())
 ```
+
 ```
 INFO: execution time for solving mip (sec) = 0.01111602783203125
 INFO: objective = 10.0
 [(T, R, 0, 2)]
 ```
-The total cost of the computed schedule is 5 although the single task is scheduled in the first period. This is due to the fact that scheduling any task costs 5 on resource `R`.
 
+The total cost of the computed schedule is 5 although the single task is scheduled in the first period. This is due to the fact that scheduling any task costs 5 on resource `R`.
 
 ## Task and Resource Lists
 
@@ -193,32 +189,33 @@ To simplify the definition of tasks, it is possible to define task lists:
 
 ```python
 from pyschedule import Scenario, solvers, plotters, alt
-S = Scenario('many_tasks',horizon=10)
+S = Scenario('many_tasks', horizon=10)
 
 # create 5 tasks of the same type
-T = S.Tasks('T',num=5,length=1,delay_cost=1)
+T = S.Tasks('T', num=5, length=1, delay_cost=1)
 
 print(T)
 ```
+
 ```
 [T0, T1, T2, T3, T4]
 ```
+
 We created 5 tasks of length 1 and delay cost 1. The index of the tasks is padded to the end of the given task name. Therefore, avoid task names ending with digits. Note that it would also be possible to create all tasks separately. But if they are similar, this simplifies the definition of scheduling problems. Finally, we can similarly define lists of resources:
 
 ```python
 from pyschedule import Scenario, solvers, plotters, alt
-S = Scenario('many_resources',horizon=10)
+S = Scenario('many_resources', horizon=10)
 
 # create 5 resources of the same type
-R = S.Resources('R',num=5)
+R = S.Resources('R', num=5)
 
 print(R)
 ```
+
 ```
 [R0, R1, R2, R3, R4]
 ```
-
-
 
 ## Resource Assignment
 
@@ -226,10 +223,10 @@ It is possible to assign multiple resources to a task, either we define that *on
 
 ```python
 from pyschedule import Scenario, solvers, plotters, alt
-S = Scenario('resources_assignment',horizon=10)
+S = Scenario('resources_assignment', horizon=10)
 
-R = S.Resources('R',num=2)
-T = S.Tasks('T',num=2,delay_cost=1)
+R = S.Resources('R', num=2)
+T = S.Tasks('T',num=2, delay_cost=1)
 
 # T0 requires either resource R0 or R1
 T[0] += R[0] | R[1]
@@ -259,7 +256,7 @@ T1 += R
 
 Now we can solve this scenario:
 ```python
-solvers.mip.solve(S,msg=1)
+solvers.mip.solve(S, msg=True)
 print(S.solution())
 ```
 ```
@@ -269,17 +266,16 @@ INFO: objective = 1.0
 ```
 Therefore, `T0` is scheduled on resource `R0` in period 0 and `T1` on resources `R0` and `R1` in period 1.
 
-
 ### Resource Dependencies
 
 It is often necessary to ensure that two tasks select the same resources:
 
 ```python
 from pyschedule import Scenario, solvers, plotters, alt
-S = Scenario('resources_dep',horizon=10)
+S = Scenario('resources_dep', horizon=10)
 
-R = S.Resources('R',num=2)
-T = S.Tasks('T',num=2,delay_cost=1)
+R = S.Resources('R', num=2)
+T = S.Tasks('T', num=2, delay_cost=1)
 
 # assign all resources to both resources
 T += alt(R)
@@ -296,7 +292,7 @@ print(T[0].tasks_req)
 
 Now we can solve this scenario
 ```python
-solvers.mip.solve(S,msg=1)
+solvers.mip.solve(S, msg=True)
 print(S.solution())
 ```
 ```
@@ -306,14 +302,13 @@ INFO: objective = 1.0
 ```
 It would be better to distribute the two tasks to the two resources. However, due to the defined resource dependencies, they must be assigned to the same one.
 
-
 ## Restricting Periods
 
 We can restrict the periods when a job can be scheduled or when resource is available:
 
 ```python
 from pyschedule import Scenario, solvers, plotters, alt
-S = Scenario('periods',horizon=10)
+S = Scenario('periods', horizon=10)
 
 # restrict the periods to 2 and 3
 T = S.Task('T', length=1, periods=[3,4])
@@ -321,7 +316,7 @@ T = S.Task('T', length=1, periods=[3,4])
 # restrict the periods to the range 1..3
 R = S.Resource('R', periods=range(1,4))
 T += R
-solvers.mip.solve(S,msg=1)
+solvers.mip.solve(S, msg=True)
 print(S.solution())
 ```
 ```
@@ -331,14 +326,13 @@ INFO: objective = 0.0
 ```
 Clearly, due to the periods restrictions, the only possible period to schedule task `T` is 3.
 
-
 ## Bounds
 
 Another way to restrict the periods when a task can be scheduled are bounds:
 
 ```python
 from pyschedule import Scenario, solvers, plotters, alt
-S = Scenario('bounds',horizon=10)
+S = Scenario('bounds', horizon=10)
 T = S.Task('T', length=1, delay_cost=1)
 R = S.Resource('R')
 T += R
@@ -346,7 +340,7 @@ T += R
 # add the constraints that T needs to get schedule after period 1 but before 5
 S += T > 1, T < 5
 
-solvers.mip.solve(S,msg=1)
+solvers.mip.solve(S, msg=True)
 print(S.solution())
 ```
 ```
@@ -355,12 +349,11 @@ INFO: objective = 1.0
 [(T, R, 1, 2)]
 ```
 
-This contraint is a *lax* bound, that is, task `T` can be schedule in any point after period 1. If we want to enforce when exactly `T` is scheduled, we can use a *tight* bound. E.g. to force `T` to be schedule exactly after period 1, we can write:
+This constraint is a *lax* bound, that is, task `T` can be schedule in any point after period 1. If we want to enforce when exactly `T` is scheduled, we can use a *tight* bound. E.g. to force `T` to be schedule exactly after period 1, we can write:
 
 ```python
 S += T >= 1
 ```
-
 
 ## Precedences
 
@@ -368,9 +361,9 @@ Tasks often need to get scheduled in a certain order:
 
 ```python
 from pyschedule import Scenario, solvers, plotters
-S = Scenario('lax_precedence',horizon=10)
+S = Scenario('lax_precedence', horizon=10)
 R = S.Resource('R')
-T = S.Tasks('T',num=2,length=1,delay_cost=1)
+T = S.Tasks('T', num=2, length=1, delay_cost=1)
 T += R
 
 # give T0 a higher delay cost
@@ -378,7 +371,7 @@ T[0].delay_cost = 2
 # add a precedence constraint to ensure that it is still scheduled one period after T1 finishes
 S += T[1] + 1 < T[0] 
 
-solvers.mip.solve(S,msg=1)
+solvers.mip.solve(S, msg=True)
 print(S.solution())
 ```
 ```
@@ -393,9 +386,9 @@ We call this a *lax* precedence constraint. Similarly to tight bounds, *tight* p
 
 ```python
 from pyschedule import Scenario, solvers, plotters
-S = Scenario('tight_precedence',horizon=10)
+S = Scenario('tight_precedence', horizon=10)
 R = S.Resource('R')
-T = S.Tasks('T',num=2,length=1,delay_cost=2)
+T = S.Tasks('T', num=2, length=1, delay_cost=2)
 T += R
 
 # give T0 a negative delay cost
@@ -403,7 +396,7 @@ T[0].delay_cost = -1
 # ensure that T[0] is scheduled exactly two periods after T[1]
 S += T[1] + 2 <= T[0] 
 
-solvers.mip.solve(S,msg=1)
+solvers.mip.solve(S, msg=True)
 print(S.solution())
 ```
 
@@ -415,18 +408,17 @@ INFO: objective = -3.0
 
 Since `T0` has negative delay cost, it would be pushed to the end of the schedule, but the tight precedence constraint ensures that it is scheduled two periods after `T1` finishes. If the delay cost of `T1` would be smaller than `T0`, than both tasks would be pushed to the end of the schedule. 
 
-
 ### Conditional Precedences
 
 It is often required that precedence constraints are only applied if two tasks are assigned to the same resource, e.g. if we want to ensure that a certain task is the last one that runs on some resource:
 
 ```python
 from pyschedule import Scenario, solvers, plotters, alt
-S = Scenario('cond_precedence',horizon=10)
+S = Scenario('cond_precedence', horizon=10)
 R = S.Resources('R',num=2)
 
-T = S.Task('T',length=1,delay_cost=1)
-T_final = S.Tasks('T_final',num=2,length=1,delay_cost=1)
+T = S.Task('T', length=1, delay_cost=1)
+T_final = S.Tasks('T_final', num=2, length=1, delay_cost=1)
 T_final[0] += R[0]
 T_final[1] += R[1]
 T += alt(R)
@@ -435,7 +427,7 @@ T += alt(R)
 S += T * R[0] < T_final[0]
 S += T * R[1] < T_final[1]
 
-solvers.mip.solve(S,msg=1)
+solvers.mip.solve(S, msg=True)
 print(S.solution())
 ```
 ```
@@ -445,22 +437,21 @@ INFO: objective = 1.0
 ```
 The first conditional precedence implies that if task `T` is scheduled on `R[0]`, then `T_final[0]` is scheduled afterwards. Therefore, it is allowed that `T_final[1]` is scheduled in the same period as `T` since `T` is not scheduled on `R[1]`.
 
-
 ## Capacities
 
 Capacity constraints can be used to restrict the number tasks which are executed during a certain time period:
 
 ```python
 from pyschedule import Scenario, solvers, plotters
-S = Scenario('capacities',horizon=10)
+S = Scenario('capacities', horizon=10)
 R = S.Resource('R')
-T = S.Tasks('T',num=4,length=1,delay_cost=1)
+T = S.Tasks('T', num=4, length=1, delay_cost=1)
 T += R
 
 # capacity constraint to limit the number of tasks until period 5 to 3
 S += R[0:5] <= 3
 
-solvers.mip.solve(S,msg=1)
+solvers.mip.solve(S, msg=True)
 print(S.solution())
 ```
 ```
@@ -486,16 +477,16 @@ Cases where task lengths are larger than one deserve a special treatment:
 
 ```python
 from pyschedule import Scenario, solvers, plotters
-S = Scenario('capacities',horizon=10)
+S = Scenario('capacities', horizon=10)
 R = S.Resource('R')
 
 # task with non-unit length
-T = S.Task('T',length=4,delay_cost=1)
+T = S.Task('T', length=4, delay_cost=1)
 T += R
 
 S += R[0:5] <= 3
 
-solvers.mip.solve(S,msg=1)
+solvers.mip.solve(S, msg=True)
 print(S.solution())
 ```
 ```
@@ -511,11 +502,11 @@ We can apply capacity constraints to all task attributes, not just the task leng
 
 ```python
 from pyschedule import Scenario, solvers, plotters
-S = Scenario('capacities_myattribute',horizon=10)
+S = Scenario('capacities_myattribute', horizon=10)
 R = S.Resource('R')
 
 # define the additional property named myproperty uniformly as 1
-T = S.Tasks('T',num=4,length=1,delay_cost=1,myattribute=1)
+T = S.Tasks('T', num=4, length=1, delay_cost=1, myattribute=1)
 # set it to 0 for the first task
 T[0].myattribute = 0
 T += R
@@ -523,7 +514,7 @@ T += R
 # the sum of myproperty must be smaller than 3 until period 5
 S += R['myattribute'][0:5] <= 3
 
-solvers.mip.solve(S,msg=1)
+solvers.mip.solve(S, msg=True)
 print(S.solution())
 ```
 ```
@@ -533,17 +524,16 @@ INFO: objective = 6.0
 ```
 Since `T[0]` does not add anything to the sum of the myattribute-values before period 5, all tasks can be scheduled before this period.
 
-
 ### Bounding Differences
 
 The default way to aggregate within the range of a capacity constraint is to summarize. On the other hand, if we want to ensure that some attribute does not change too much over time, we can also restrict the sum of differences of this attribute:
 
 ```python
 from pyschedule import Scenario, solvers, plotters
-S = Scenario('capacities_diff',horizon=10)
+S = Scenario('capacities_diff', horizon=10)
 R = S.Resource('R')
 
-T = S.Tasks('T',num=4,length=1,delay_cost=1,myattribute=1)
+T = S.Tasks('T', num=4, length=1, delay_cost=1, myattribute=1)
 T[0].delay_cost = 2
 T[0].myattribute = 0
 T[1].delay_cost = 2
@@ -553,7 +543,7 @@ T += R
 # limit the sum of differences of myattribute to 1
 S += R['myattribute'].diff <= 1
 
-solvers.mip.solve(S,msg=1)
+solvers.mip.solve(S, msg=True)
 print(S.solution())
 ```
 ```
@@ -565,32 +555,32 @@ Note that if we do not define the range of a capacity constraint like above, the
 
 The `.diff`-capacity constraint limits the sum of increases and decreases. If we only want to limit the increases or decreases, then we can use `.diff_up` or `.diff_down`, respectively.
 
-
 ### Combining Constraints
 
 We can combine capacity constraints doing natural arithmetic:
 
 ```python
 from pyschedule import Scenario, solvers, plotters
-S = Scenario('capacities_arithmetic',horizon=10)
+S = Scenario('capacities_arithmetic', horizon=10)
 R = S.Resource('R')
 
-T = S.Tasks('T',num=4,length=1,delay_cost=1,myattribute=1)
+T = S.Tasks('T', num=4, length=1, delay_cost=1, myattribute=1)
 T += R
  
 # add two capacities
 S += R['myattribute'][:3] + R['myattribute'][5:7] <= 1
 
-solvers.mip.solve(S,msg=1)
+solvers.mip.solve(S, msg=True)
 print(S.solution())
 ```
+
 ```
 INFO: execution time for solving mip (sec) = 0.03471493721008301
 INFO: objective = 14.0
 [(T3, R, 0, 1), (T2, R, 3, 4), (T1, R, 4, 5), (T0, R, 7, 8)]
 ```
-Since one task is schedule in period 0, we cannot schedule any more tasks in periods 0 to 2 or in periods 5 to 6 . Therefore, we squeeze in two tasks in periods 3 and 4 and one task in period 7.
 
+Since one task is schedule in period 0, we cannot schedule any more tasks in periods 0 to 2 or in periods 5 to 6 . Therefore, we squeeze in two tasks in periods 3 and 4 and one task in period 7.
 
 ## Task Groups
 
@@ -598,22 +588,25 @@ There are often task redundancies in a planning project, e.g. there might be a g
 
 ```python
 from pyschedule import Scenario, solvers, plotters
-S = Scenario('task_groups',horizon=10)
+S = Scenario('task_groups', horizon=10)
 R = S.Resource('R')
 
 # these tasks are interchangeable
-T = S.Tasks('T',num=10,length=1,delay_cost=1,is_group=True)
+T = S.Tasks('T', num=10, length=1, delay_cost=1, is_group=True)
 T += R
  
-solvers.mip.solve(S,msg=1)
+solvers.mip.solve(S, msg=True)
 print(S.solution())
 ```
+
 ```
 INFO: execution time for solving mip (sec) = 0.01534271240234375
 INFO: objective = 45.0
 [(T0, R, 0, 1), (T1, R, 1, 2), (T2, R, 2, 3), (T3, R, 3, 4), (T4, R, 4, 5), (T5, R, 5, 6), (T6, R, 6, 7), (T7, R, 7, 8), (T8, R, 8, 9), (T9, R, 9, 10)]
 ```
+
 Running this with setting `is_group=False` only slightly increases the running time, but there are scenarios where this difference is much more significant:
+
 ```
 INFO: execution time for solving mip (sec) = 0.025635719299316406
 INFO: objective = 45.0
@@ -621,7 +614,6 @@ INFO: objective = 45.0
 ```
 
 **CAUTION**: combining task groups with capacities with resource dependencies might not work in some cases.
-
 
 <!---
 
@@ -654,7 +646,7 @@ We see that the always two tasks are scheduled in parallel on the single resourc
 
 The default pyschedule backend is a <a href="https://en.wikipedia.org/wiki/Integer_programming">time-indexed mixed integer formulation (MIP)</a>. There are the following parameters:
 
-- **msg**: show info on/off (default is 0)
+- **msg**: show info on/off (default is False)
 - **time_limit**: limit the solving time in seconds (default is None)
 - **ratio_gap**: stop the solving process when this integrality gap is reached, e.g. 1.2 stands for 20% gap to optimality (default is None)
 - **random_seed**: the random seed used by the solver (default is 42)
@@ -663,7 +655,7 @@ The default pyschedule backend is a <a href="https://en.wikipedia.org/wiki/Integ
 E.g. this could be used as follows:
 
 ```python
-solvers.mip.solve(S,kind='CPLEX',time_limit=60,random_seed=42,msg=1)
+solvers.mip.solve(S,kind='CPLEX', time_limit=60, random_seed=42, msg=True)
 ```
 
 ## Plotter Parameters
@@ -682,17 +674,5 @@ The default pyschedule backend to plot a schedule is <a href="https://matplotlib
 E.g. this could be used as follows:
 
 ```python
-plotters.matplotlib.plot(S,img_filename='tmp.png',img_size=(5,5),hide_tasks=[T])
+plotters.matplotlib.plot(S, img_filename='tmp.png', fig_size=(5,5), hide_tasks=[T])
 ```
-
-
-**FINAL CAUTION:** pyschedule is under active development, there might be non-backward-compatible changes.
-
- 
- 
-## Appendix
-
-```python
-import sys
-sys.path.append('src')
-``` 
