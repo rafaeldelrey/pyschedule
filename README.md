@@ -6,15 +6,15 @@
 
 pyschedule is python package to compute resource-constrained task schedules. Some features are: 
 
-- **precedence relations:** e.g. task A should be done before task B
-- **resource requirements:** e.g. task A can be done by resource X or Y
-- **resource capacities:** e.g. resource X can only process a few tasks
+-   **precedence relations:** e.g. task A should be done before task B
+-   **resource requirements:** e.g. task A can be done by resource X or Y
+-   **resource capacities:** e.g. resource X can only process a few tasks
 
 Previous use-cases include:
 
-- school timetables: assign teachers to classes
-- beer brewing: assign equipment to brewing stages
-- sport schedules: assign stadiums to games
+-   school timetables: assign teachers to classes
+-   beer brewing: assign equipment to brewing stages
+-   sport schedules: assign stadiums to games
 
 A simple pyschedule scenario where three houshold tasks need to get assigned to two persons, Alice and Bob:
 
@@ -76,8 +76,8 @@ S = Scenario('hello_world', horizon=10)
 
 This scenario is named `hello_world` and has a time horizon of 10 periods. The granularity of the periods depends on your problem, e.g. a period could be an hour, a week, or a day. However, having far more than 100 periods makes the computation of a schedule quite hard. Some tricks to reduce the number of periods are:
 
-- Remove periods which are not used, like hours during the night.
-- Move to a higher granularity, e.g. try a granularity of 2 hours instead of 1 hour and *round* tasks *up* if necessary.
+-   Remove periods which are not used, like hours during the night.
+-   Move to a higher granularity, e.g. try a granularity of 2 hours instead of 1 hour and *round* tasks *up* if necessary.
 
 We need at least one resource in a scenario:
 
@@ -295,11 +295,13 @@ Now we can solve this scenario
 solvers.mip.solve(S, msg=True)
 print(S.solution())
 ```
+
 ```
 INFO: execution time for solving mip (sec) = 0.02900981903076172
 INFO: objective = 1.0
 [(T1, R0, 0, 1), (T0, R0, 1, 2)]
 ```
+
 It would be better to distribute the two tasks to the two resources. However, due to the defined resource dependencies, they must be assigned to the same one.
 
 ## Restricting Periods
@@ -319,11 +321,13 @@ T += R
 solvers.mip.solve(S, msg=True)
 print(S.solution())
 ```
+
 ```
 INFO: execution time for solving mip (sec) = 0.04649972915649414
 INFO: objective = 0.0
 [(T, R, 3, 4)]
 ```
+
 Clearly, due to the periods restrictions, the only possible period to schedule task `T` is 3.
 
 ## Bounds
@@ -646,11 +650,11 @@ We see that the always two tasks are scheduled in parallel on the single resourc
 
 The default pyschedule backend is a <a href="https://en.wikipedia.org/wiki/Integer_programming">time-indexed mixed integer formulation (MIP)</a>. There are the following parameters:
 
-- **msg**: show info on/off (default is False)
-- **time_limit**: limit the solving time in seconds (default is None)
-- **ratio_gap**: stop the solving process when this integrality gap is reached, e.g. 1.2 stands for 20% gap to optimality (default is None)
-- **random_seed**: the random seed used by the solver (default is 42)
-- **kind**: the Integer Programming backend to use. The default is `CBC` which comes preinstalled with package `pulp`. If <a href="http://scip.zib.de/">SCIP</a> is installed (command `scip` must be running), you can use `SCIP`. Finally, if you have <a href="https://www.ibm.com/analytics/data-science/prescriptive-analytics/cplex-optimizer">CPLEX</a> installed (command `cplex` must be running), you can use `CPLEX`
+-   **msg**: show info on/off (default is False)
+-   **time_limit**: limit the solving time in seconds (default is None)
+-   **ratio_gap**: stop the solving process when this integrality gap is reached, e.g. 1.2 stands for 20% gap to optimality (default is None)
+-   **random_seed**: the random seed used by the solver (default is 42)
+-   **kind**: the Integer Programming backend to use. The default is `CBC` which comes preinstalled with package `pulp`. If <a href="http://scip.zib.de/">SCIP</a> is installed (command `scip` must be running), you can use `SCIP`. Finally, if you have <a href="https://www.ibm.com/analytics/data-science/prescriptive-analytics/cplex-optimizer">CPLEX</a> installed (command `cplex` must be running), you can use `CPLEX`
 
 E.g. this could be used as follows:
 
@@ -658,21 +662,34 @@ E.g. this could be used as follows:
 solvers.mip.solve(S,kind='CPLEX', time_limit=60, random_seed=42, msg=True)
 ```
 
-## Plotter Parameters
+## Plotter Parameters: matplotlib and plotly
 
-The default pyschedule backend to plot a schedule is <a href="https://matplotlib.org/">matplotlib</a>. Some parameters are:
+The default pyschedule backend to plot a schedule is <a href="https://matplotlib.org/">matplotlib</a>. The parameters are:
 
-- **img_filename**: write the plot as a `.png`-file (default is None)
-- **fig_size**: size of the plot (default is (15,5))
-- **resource_height**: the height of a resource in the plot (default is 1)
-- **show_task_labels**: show the labels of tasks in the plot (default is True)
-- **hide_tasks**: list of tasks not to plot (default is [])
-- **hide_resources**: list of resources to hide in the plot (default is [])
-- **task_colors**: a mapping of tasks to colors (default is empty dictionary)
-- **vertical_text**: write the task labels vertically (default if False)
+-   **img_filename**: write the plot as a `.png`-file (default is None)
+-   **fig_size**: size of the plot (default is (15,5))
+-   **resource_height**: the height of a resource in the plot (default is 1)
+-   **show_task_labels**: show the labels of tasks in the plot (default is True)
+-   **hide_tasks**: list of tasks not to plot (default is [])
+-   **hide_resources**: list of resources to hide in the plot (default is [])
+-   **task_colors**: a mapping of tasks to colors (default is empty dictionary)
+-   **vertical_text**: write the task labels vertically (default if False)
 
 E.g. this could be used as follows:
 
 ```python
 plotters.matplotlib.plot(S, img_filename='tmp.png', fig_size=(5,5), hide_tasks=[T])
+```
+
+To rather use the plotly library:
+
+Some parameters are:
+
+-   **hide_tasks**: list of tasks not to plot (default is [])
+-   **date_init**: a datetime instance (default is None)
+-   **delta_t**: a timedelta instance (default is None)
+-   **data_type**: choose the y axis, either 'Task' or (default is 'Resource') 
+
+```python
+plotters.plotly.plot(S)
 ```
