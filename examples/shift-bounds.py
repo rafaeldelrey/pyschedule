@@ -1,16 +1,15 @@
 # test artefact for the case that pyschedule is
 # read from folder
+import getopt
 import sys
 sys.path += ['../src','src']
-import getopt
-opts, _ = getopt.getopt(sys.argv[1:], 't:', ['test'])
+from pyschedule import Scenario, solvers, plotters
 
-from pyschedule import Scenario, solvers, plotters, Task
-S = Scenario('shift_bounds',horizon=8)
+S = Scenario('Shift_bounds', horizon=8)
 
 # define two employees
-empl0 = S.Resource('empl0')
-empl1 = S.Resource('empl1')
+empl0 = S.Resource('Employee_0')
+empl1 = S.Resource('Employee_1')
 
 # employee 0 starts at two and ends
 # at most four hours later
@@ -37,15 +36,13 @@ T += empl0 | empl1
 S += empl0_beg < T*empl0, T*empl0 < empl0_fin
 S += empl1_beg < T*empl1, T*empl1 < empl1_fin
 
-
 if solvers.mip.solve(S,msg=0,kind='CBC'):
-	opts, _ = getopt.getopt(sys.argv[1:], 't:', ['test'])
-	if ('--test','') in opts:
-		assert(empl0_fin.start_value == 4)
-		assert(empl1_fin.start_value == 4)
-		print('test passed')
-	else:
-		plotters.matplotlib.plot(S)
+    opts, _ = getopt.getopt(sys.argv[1:], 't:', ['test'])
+    if ('--test','') in opts:
+        assert empl0_fin.start_value == 4
+        assert empl1_fin.start_value == 4
+        print('test passed')
+    else:
+        plotters.matplotlib.plot(S)
 else:
-	print('no solution found')
-	assert(1==0)
+    print('no solution found')

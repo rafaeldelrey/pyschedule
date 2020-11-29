@@ -15,16 +15,15 @@ S += [ T[i,j-1] < T[i,j] for i in range(n) for j in range(1,n) ]
 
 # resource assignment modulo n
 for j in range(n):
-	for i in range(n):
-		T[(i+j) % n,j] += R[i]
+    for i in range(n):
+        T[(i+j) % n,j] += R[i]
 
-if pyschedule.solvers.mip.solve(S,msg=0,kind='CBC'):
-	import getopt
-	opts, _ = getopt.getopt(sys.argv[1:], 't:', ['test'])
-	if ('--test','') in opts:
-		print('test passed')
-	else:
-		pyschedule.plotters.matplotlib.plot(S,color_prec_groups=False)
+if pyschedule.solvers.mip.solve(S,msg=False,kind='CBC'):
+    import getopt
+    opts, _ = getopt.getopt(sys.argv[1:], 't:', ['test'])
+    if ('--test','') in opts:
+        print('test passed')
+    else:
+        pyschedule.plotters.matplotlib.plot(S,color_prec_groups=False)
 else:
-	print('no solution found')
-	assert(1==0)
+    print('no solution found')
