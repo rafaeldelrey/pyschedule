@@ -1,23 +1,21 @@
-'''
-Copyright 2015 Tim Nonner
-
-Licensed to the Apache Software Foundation (ASF) under one
-or more contributor license agreements.  See the NOTICE file
-distributed with this work for additional information
-regarding copyright ownership.  The ASF licenses this file
-to you under the Apache License, Version 2.0 (the
-"License"); you may not use this file except in compliance
-with the License.  You may obtain a copy of the License at
-
-  http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing,
-software distributed under the License is distributed on an
-"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-KIND, either express or implied.  See the License for the
-specific language governing permissions and limitations
-under the License.
-'''
+#Copyright 2015 Tim Nonner
+#
+#Licensed to the Apache Software Foundation (ASF) under one
+#or more contributor license agreements.  See the NOTICE file
+#distributed with this work for additional information
+#regarding copyright ownership.  The ASF licenses this file
+#to you under the Apache License, Version 2.0 (the
+#"License"); you may not use this file except in compliance
+#with the License.  You may obtain a copy of the License at
+#
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+#Unless required by applicable law or agreed to in writing,
+#software distributed under the License is distributed on an
+#"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+#KIND, either express or implied.  See the License for the
+#specific language governing permissions and limitations
+#under the License.
 
 __doc__ = """ python package to formulate and solve resource-constrained scheduling problems
 """
@@ -49,8 +47,8 @@ def alt(*args) :
     Method to reduce the given elements with the or-operator
     e.g. alt([R1,R2,R3]) = R1|R2|R3
     """
-    l = [ functools.reduce(lambda x,y: x|y, a) for a in args if _isiterable(a) or isinstance(a, types.GeneratorType)]
-    l += [ a for a in args if not _isiterable(a) and not isinstance(a, types.GeneratorType)  ]
+    l = [functools.reduce(lambda x,y: x|y, a) for a in args if _isiterable(a) or isinstance(a, types.GeneratorType)]
+    l += [a for a in args if not _isiterable(a) and not isinstance(a, types.GeneratorType) ]
     return functools.reduce(lambda x,y: x|y, l)
 
 
@@ -165,7 +163,7 @@ class _SchedElementAffine:
             if key in self.map_obj and self.map_obj[key] is not None:
                 return '*'+str(self.map_obj[key])
             return ''
-        return self.affine_operator.join([ str(key)+format_obj(key)+format_coeff(key) for key in self ])
+        return self.affine_operator.join([str(key)+format_obj(key)+format_coeff(key) for key in self])
 
     def __repr__(self):
         return self.__str__()
@@ -179,71 +177,66 @@ class _List(list):
         if l is not None:
             self[:] = l
 
-    def _to_list(self,l):
-        new_list = _List()
-        new_list[:] = l
-        return new_list
-
     def _pair(self,other):
         if _isiterable(other):
             return zip(self,other)
         return ( (T,other) for T in self )
 
     def __lt__(self,other) :
-        return _List([ T < T_ for (T,T_) in self._pair(other) ])
+        return _List([T < T_ for (T,T_) in self._pair(other)])
 
     def __gt__(self,other) :
-        return _List([ T > T_ for (T,T_) in self._pair(other) ])
+        return _List([T > T_ for (T,T_) in self._pair(other)])
 
     def __le__(self,other) :
-        return _List([ T <= T_ for (T,T_) in self._pair(other) ])
+        return _List([T <= T_ for (T,T_) in self._pair(other)])
 
     def __ge__(self,other) :
-        return _List([ T >= T_ for (T,T_) in self._pair(other) ])
+        return _List([T >= T_ for (T,T_) in self._pair(other)])
 
     def __ne__(self,other) :
-        return _List([ T != T_ for (T,T_) in self._pair(other) ])
+        return _List([T != T_ for (T,T_) in self._pair(other)])
 
     def __lshift__(self,other) :
-        return _List([ T << T_ for (T,T_) in self._pair(other) ])
+        return _List([T << T_ for (T,T_) in self._pair(other)])
 
     def __rshift__(self,other) :
-        return _List([ T >> T_ for (T,T_) in self._pair(other) ])
+        return _List([T >> T_ for (T,T_) in self._pair(other)])
 
     def __add__(self,other) :
-        return _List([ T + T_ for (T,T_) in self._pair(other) ])
+        return _List([T + T_ for (T,T_) in self._pair(other)])
 
     def __sub__(self,other) :
-        return _List([ T - T_ for (T,T_) in self._pair(other) ])
+        return _List([T - T_ for (T,T_) in self._pair(other)])
 
     def __radd__(self,other) :
-        return _List([ T + T_ for (T,T_) in self._pair(other) ])
+        return _List([T + T_ for (T,T_) in self._pair(other)])
 
     def __rsub__(self,other) :
-        return _List([ T - T_ for (T,T_) in self._pair(other) ])
+        return _List([T - T_ for (T,T_) in self._pair(other)])
 
     def __iadd__(self,other):
-        return _List([ T.__iadd__(other) for T in self ])
+        return _List([T.__iadd__(other) for T in self])
 
     def __isub__(self,other):
-        return _List([ T.__isub__(other) for T in self ])
+        return _List([T.__isub__(other) for T in self])
 
     def __mul__(self,other) :
         if not _isiterable(other) and not isinstance(other,_ResourceAffine):
-            return _List([ T*T_ for (T,T_) in self._pair(other) ])
-        return _List([ _List([ T*T_ for T_ in other ]) for T in self ])
+            return _List([T*T_ for (T,T_) in self._pair(other)])
+        return _List([_List([T*T_ for T_ in other]) for T in self])
 
     def __imul__(self,other):
-        return _List([ T.__imul__(other) for T in self ])
+        return _List([T.__imul__(other) for T in self])
 
     def __getitem__(self,key):
         '''
         automatically casts in _List
         '''
         if isinstance(key, str):
-            return _List([ T[key] for T in self ])
+            return _List([T[key] for T in self])
         elif isinstance(key, slice):
-            return _List([ T for T in list(self)[key] ])
+            return _List([T for T in list(self)[key]])
         return super(_List, self).__getitem__(key)
 
 
@@ -303,12 +296,12 @@ class Scenario(_SchedElement):
         #if periods is None and self.horizon is not None:
         #   periods = list(range(self.horizon))
         task = Task(name=name,
-            length=length,
-            periods=periods,
-            group=group,
-            delay_cost=delay_cost,
-            schedule_cost=schedule_cost,
-            **kwargs)
+                    length=length,
+                    periods=periods,
+                    group=group,
+                    delay_cost=delay_cost,
+                    schedule_cost=schedule_cost,
+                    **kwargs)
         self.add_task(task)
         return task
 
@@ -384,11 +377,11 @@ class Scenario(_SchedElement):
         """
         Returns the last computed solution in tabular form with columns: task, resource, start, end
         """
-        solution =  [ (T,R,T.start_value,T.start_value+T.length)
+        solution =  [(T,R,T.start_value,T.start_value+T.length)
                     for T in self.tasks()
                     if T.start_value is not None and T.resources is not None
                     for R in T.resources
-                    ]
+                   ]
         # sort according to start and name
         solution = sorted(solution, key = lambda x : (x[2],str(x[0]),str(x[1])) )
         return solution
@@ -397,7 +390,7 @@ class Scenario(_SchedElement):
         """
         Returns a representation of all objectives
         """
-        tasks_objective = [T*T['delay_cost'] for T in self.tasks() if 'delay_cost' in T ]
+        tasks_objective = [T*T['delay_cost'] for T in self.tasks() if 'delay_cost' in T]
         if tasks_objective:
             return functools.reduce(lambda x,y:x+y,tasks_objective)
         return None
@@ -406,18 +399,24 @@ class Scenario(_SchedElement):
         """
         Returns the value of the objective
         """
-        return sum([ T['_delay_cost']*(T.start_value+T.length) for T in self.tasks()
+        return sum([T['_delay_cost']*(T.start_value+T.length) for T in self.tasks()
                     if '_delay_cost' in T])
 
     def use_makespan_objective(self) :
         """
-        Set the objective to the makespan of all included tasks
+        Set the objective to the makespan of all included tasks.
+        https://en.wikipedia.org/wiki/Makespan
+        In operations research, the makespan of a project is the distance in time that elapses
+        from the start of work to the end. This type of multi-mode resource constrained project
+        scheduling problem (MRCPSP) seeks to create the shortest logical project schedule,
+        by efficiently using project resources, adding the lowest number of additional resources as
+        possible to achieve the minimum makespan.
         """
         self.clear_objective()
         if not self.tasks():
             return
         if 'MakeSpan' in self._tasks :
-            self._constraints = [ C for C in self._constraints if self._tasks['MakeSpan'] not in C.tasks() ]
+            self._constraints = [C for C in self._constraints if self._tasks['MakeSpan'] not in C.tasks()]
             del self._tasks['MakeSpan']
         tasks = self.tasks() # save tasks before adding makespan
         makespan = self.Task('MakeSpan')
@@ -428,7 +427,11 @@ class Scenario(_SchedElement):
 
     def use_flowtime_objective(self) :
         """
-        Sets the objective to a uniform flow-time objective
+        Sets the objective to a uniform flow-time objective.
+        Flow time: The amount of time a flow unit spends in a business process
+        from beginning to end, also known as the total processing time. If there is more
+        than one path through the process, the flow time is equivalent to the length of
+        the longest path.
         """
         for T in self.tasks():
             T.delay_cost = 1
@@ -451,7 +454,7 @@ class Scenario(_SchedElement):
     def constraints(self,constraint_class=None):
         if constraint_class is None:
             return self._constraints
-        return [ C for C in self._constraints if isinstance(C,constraint_class) ]
+        return [C for C in self._constraints if isinstance(C,constraint_class)]
 
     def precs_lax(self):
         return self.constraints(PrecedenceLax)
@@ -484,14 +487,14 @@ class Scenario(_SchedElement):
         for resource in constraint.resources():
             if resource not in self:
                 raise Exception('ERROR: resource %s is not contained in scenario %s'%(str(resource.name),str(self.name)))
-        if str(constraint) in [ str(C) for C in self._constraints ]:
+        if str(constraint) in [str(C) for C in self._constraints]:
             return self
         self._constraints.append(constraint)
 
     def remove_constraint(self,constraint):
-        if str(constraint) not in [ str(C) for C in self._constraints ]:
+        if str(constraint) not in [str(C) for C in self._constraints]:
             raise Exception('ERROR: constraint %s not contained in scenario %s'%(str(constraint),str(self.name)))
-        self._constraints = [ C for C in self._constraints if str(C) != str(constraint) ]
+        self._constraints = [C for C in self._constraints if str(C) != str(constraint)]
 
     def add_task(self,task):
         if task.name in self._tasks and task is not self._tasks[task.name]:
@@ -504,7 +507,7 @@ class Scenario(_SchedElement):
             del self._tasks[task.name]
         else :
             raise Exception('ERROR: task with name %s not contained in scenario %s' % (str(task.name),str(self.name)))
-        self._constraints = [ C for C in self._constraints if task not in C.tasks() ]
+        self._constraints = [C for C in self._constraints if task not in C.tasks()]
 
     def add_task_affine(self,task_affine):
         for task in task_affine:
@@ -526,7 +529,7 @@ class Scenario(_SchedElement):
         else:
             raise Exception('ERROR: resource with name %s not contained in scenario %s'%
                         (str(resource.name),str(self.name)))
-        self._constraints = [ C for C in self._constraints if resource not in C.resources() ]
+        self._constraints = [C for C in self._constraints if resource not in C.resources()]
 
     def get_periods(self,el):
         """
@@ -617,7 +620,7 @@ class Scenario(_SchedElement):
 
         s += 'TASKS:\n'
         for T in self.tasks() :
-            s += '%s : %s\n'%(str(T.name),','.join([ str(RA) for RA in T.resources_req ]))
+            s += '%s : %s\n'%(str(T.name),','.join([str(RA) for RA in T.resources_req]))
         s += '\n'
 
         s += 'JOINT RESOURCES:\n'
@@ -625,14 +628,14 @@ class Scenario(_SchedElement):
         for RA in ra_to_tasks:
             if len(RA) < 2:
                 continue
-            s += '%s : %s\n'%(str(RA),','.join([ str(T) for T in ra_to_tasks[RA] ]))
+            s += '%s : %s\n'%(str(RA),','.join([str(T) for T in ra_to_tasks[RA]]))
         s += '\n'
 
         def print_constraint(title,constraints):
             s = ''
             if constraints:
                 s += '%s:\n'%title
-                s += '\n'.join([ C.__repr__() for C in constraints ]) + '\n'
+                s += '\n'.join([C.__repr__() for C in constraints]) + '\n'
                 s += '\n'
             return s
         s += print_constraint('LAX PRECEDENCES',self.precs_lax())
@@ -704,7 +707,7 @@ class Task(_SchedElement) :
 
     def __mul__(self,other) :
         if _isiterable(other):
-            return [ self*el for el in other ]
+            return [self*el for el in other]
         return _TaskAffine(self) * other
 
     def __radd__(self,other) :
@@ -717,7 +720,7 @@ class Task(_SchedElement) :
         return self
 
     def remove_resources_req(self,RA):
-        self.resources_req = [ RA_ for RA_ in self.resources_req if str(RA_) != str(RA) ]
+        self.resources_req = [RA_ for RA_ in self.resources_req if str(RA_) != str(RA)]
         return self
 
     def get_resources_in_req(self):
@@ -730,7 +733,7 @@ class Task(_SchedElement) :
         return self
 
     def remove_tasks_req(self,T):
-        self.tasks_req = [ T_ for T_ in self.tasks_req if str(T_) != str(T) ]
+        self.tasks_req = [T_ for T_ in self.tasks_req if str(T_) != str(T)]
         return self
 
     def __iadd__(self,other):
@@ -824,9 +827,9 @@ class _TaskAffine(_SchedElementAffine) :
         _SchedElementAffine.__init__(self,unknown=unknown)
 
     def _get_prec(self,TA,comp_operator) :
-        pos_tasks = [ T for T in TA if isinstance(T,Task) and TA[T] >= 0 ]
-        neg_tasks = [ T for T in TA if isinstance(T,Task) and TA[T] < 0 ]
-        offsets = [ T*TA[T] for T in TA if _isnumeric(T) ]
+        pos_tasks = [T for T in TA if isinstance(T,Task) and TA[T] >= 0]
+        neg_tasks = [T for T in TA if isinstance(T,Task) and TA[T] < 0]
+        offsets = [T*TA[T] for T in TA if _isnumeric(T)]
         if len(neg_tasks) > 1 or len(pos_tasks) > 1 or len(offsets) > 1 :
             raise Exception('ERROR: can only deal with simple precedences of \
                                     the form T1 + 3 < T2 or T1 < 3 and not %s'%str(TA) )
@@ -873,42 +876,42 @@ class _TaskAffine(_SchedElementAffine) :
 
     def __lt__(self,other) :
         if _isiterable(other) :
-            return [ self < x for x in other ]
+            return [self < x for x in other]
         if not isinstance(other,type(self)) :
             return self < _TaskAffine(other)
         return self._get_prec(self-other,'<')
 
     def __gt__(self,other) :
         if _isiterable(other) :
-            return [ self > x for x in other ]
+            return [self > x for x in other]
         if not isinstance(other,type(self)) :
             return self > _TaskAffine(other)
         return _TaskAffine(other) < self
 
     def __le__(self,other) :
         if _isiterable(other) :
-            return [ self <= x for x in other ]
+            return [self <= x for x in other]
         if not isinstance(other,type(self)) :
             return self <= _TaskAffine(other)
         return self._get_prec(self-other,'<=')
 
     def __ge__(self,other) :
         if _isiterable(other) :
-            return [ self >= x for x in other ]
+            return [self >= x for x in other]
         if not isinstance(other,type(self)) :
             return self >= _TaskAffine(other)
         return _TaskAffine(other) <= self
 
     def __lshift__(self,other) :
         if _isiterable(other) :
-            return [ self << x for x in other ]
+            return [self << x for x in other]
         if not isinstance(other,type(self)) :
             return self << _TaskAffine(other)
         return self._get_prec(self-other,'<<')
 
     def __rshift__(self,other) :
         if _isiterable(other) :
-            return [ self >> x for x in other ]
+            return [self >> x for x in other]
         if not isinstance(other,type(self)) :
             return self >> _TaskAffine(other)
         return _TaskAffine(other) << self
@@ -1282,14 +1285,14 @@ class _SliceAffine(_SchedElementAffine):
 
     def __le__(self,other):
         if _isiterable(other):
-            return [ self <= x for x in other ]
+            return [self <= x for x in other]
         if not isinstance(other,type(self)):
             return self <= _SliceAffine(other)
         return self._get_cap(self-other)
 
     def __ge__(self,other) :
         if _isiterable(other) :
-            return [ self >= x for x in other ]
+            return [self >= x for x in other]
         if not isinstance(other,type(self)) :
             return self >= _SliceAffine(other)
         return self._get_cap(other-self)
@@ -1319,7 +1322,7 @@ class Capacity(_Constraint):
     def slices(self,kind=None):
         if kind is None:
             return self.SLA
-        return [ SL for SL in self.SLA if SL.kind == kind ]
+        return [SL for SL in self.SLA if SL.kind == kind]
 
     def slices_sum(self):
         return self.slices(kind='sum')
