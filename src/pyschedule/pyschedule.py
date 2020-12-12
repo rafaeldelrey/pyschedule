@@ -306,7 +306,7 @@ class Scenario(_SchedElement):
         return task
 
     def Tasks(self,name,num=1,is_group=False,**kwargs) :
-        tasks = Tasks(name=name,num=num,is_group=is_group,**kwargs)
+        tasks = TaskList(name=name,num=num,is_group=is_group,**kwargs)
         for T in tasks:
             #if T.periods is None:
             #   T.periods = list(range(self.horizon))
@@ -341,7 +341,7 @@ class Scenario(_SchedElement):
         return resource
 
     def Resources(self,name,num=1,is_group=False,**kwargs) :
-        resources = Resources(name=name,num=num,is_group=is_group,**kwargs)
+        resources = ResourceList(name=name,num=num,is_group=is_group,**kwargs)
         for R in resources:
             #if R.periods is None:
             #   R.periods = list(range(self.horizon))
@@ -793,9 +793,9 @@ class Task(_SchedElement) :
 
 
 
-class Tasks(_List):
+class TaskList(_List):
     """
-    A group of tasks
+    A list of tasks
     """
     def __init__(self,name,num=1,is_group=False,**kwargs):
         if is_group:
@@ -808,9 +808,9 @@ class Tasks(_List):
 
 
 
-class Resources(_List):
+class ResourceList(_List):
     """
-    A group of resources
+    A list of resources
     """
     def __init__(self,name,num=1,is_group=False,**kwargs):
         if is_group:
