@@ -141,10 +141,10 @@ def solve(scenario,time_limit=None,copy_scenario=False,msg=0) :
     if time_limit :
         ort_time_limit = int(time_limit*1000)
     else :
-        ort_time_limit = 1e8
-    branch_limit = 1e8
-    failures_limit = 1e8
-    solutions_limit = 1e8
+        ort_time_limit = int(1e8)
+    branch_limit = int(1e8)
+    failures_limit = int(1e8)
+    solutions_limit = int(1e8)
     limits = (ort_solver.Limit(ort_time_limit, branch_limit, failures_limit, solutions_limit, True))
 
     # add log if mst is requested
