@@ -10,10 +10,6 @@ horizon = 10
 # solver feedback
 msg = True
 
-# cloud-substitute for cpoptimizer.solve, requires api_key in variable space
-#def solve_docloud(scenario):
-#    return solvers.cpoptimizer.solve_docloud(scenario,api_key=api_key,msg=msg)
-
 def solve_cbc(scenario):
     return solvers.mip.solve(scenario,kind='CBC',msg=msg)
 
@@ -44,9 +40,6 @@ solve_ortools
 #solve_gurobi,
 #solve_scip,
 #solve_scip_bigm,
-#solvers.ortools.solve,
-#solvers.cpoptimizer.solve,
-#solve_docloud
 ]
 
 def two_task_scenario() :
