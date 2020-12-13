@@ -301,7 +301,7 @@ with open('solvers.csv','w') as f :
     f.close()
 
 # plot table to screen
-print('###############################################')
+print('################ Results #########################')
 try :
     import pandas as pd
     df = pd.DataFrame(table[1:])
@@ -315,4 +315,5 @@ try :
         f.close()
 except :
     print('INFO: install pandas to get nicer table plot')
-    print(s)
+    print(table)
+print('##################################################')
