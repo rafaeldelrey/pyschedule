@@ -136,8 +136,10 @@ def solve(scenario,time_limit=None,copy_scenario=False,msg=False) :
         # if no offset
         if P.offset == 0:
             ort_solver.Add(task_to_interval[P.task_right].StartsAtEnd(task_to_interval[P.task_left]))
-        else:
-            ort_solver.Add(task_to_interval[P.task_right].StartsAfterEndWithDelay(task_to_interval[P.task_left], P.offset))
+        else:  # dont' use the same method
+            # we could use the same method, maybe check if there is a performance gain
+            ort_solver.Add(task_to_interval[P.task_right].StartsAfterEndWithDelay(task_to_interval[P.task_left],
+                                                                                  P.offset))
 
     # bound low
     for P in S.bounds_low():
@@ -207,12 +209,12 @@ def solve(scenario,time_limit=None,copy_scenario=False,msg=False) :
     limits = (ort_solver.Limit(ort_time_limit, branch_limit, failures_limit, solutions_limit, True))
 
     # add log if msg is requested
-    search_params = [limits,collector,ort_objective]
+    search_params = [limits, collector, ort_objective]
     if msg:
         search_params.append(search_log)
 
     # solves the problem.
-    ort_solver.Solve(main_phase,search_params)
+    ort_solver.Solve(main_phase, search_params)
 
     # check for a solution
     if not collector.SolutionCount():
