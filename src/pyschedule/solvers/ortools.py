@@ -19,7 +19,7 @@
 
 import collections
 import copy
-
+import sys
 
 def solve(scenario,time_limit=None,copy_scenario=False,msg=False) :
     """ Integration of the ortools scheduling solver """
@@ -64,19 +64,30 @@ def solve(scenario,time_limit=None,copy_scenario=False,msg=False) :
         task_to_interval[task] = interval_from_task
 
     # resource requirements
-    for T in S.tasks():
-        I = task_to_interval[T]
-        for RA in T.resources_req:
-            RA_tasks = list()
-            for R in RA :
+    for T in S.tasks():  # loop over tasks
+        I = task_to_interval[T]  # get the FixedDuration interval for this task
+        for RA in T.resources_req:  # loop over the resources required by this task
+            # create an empty list which contains TODO comment
+            RA_tasks = []
+            for R in RA:  # each resource among all assigned resources
+                # map the resource to a FixedDuration IntervalVar as well
+                # this FixedDurationIntervalVar repesents the fact that the
+                # resource is busy during this time interval
                 I_ = ort_solver.FixedDurationIntervalVar(0,S.horizon-T.length,T.length,True,T.name+'_'+R.name)
                 resource_to_intervals[R].append(I_)
+
+                # stores this time interval into the RA_tasks list
                 RA_tasks.append(I_)
+
+                # tells that the resource occupation remains sync'ed with
+                # the task schedule
                 resource_task_to_interval[(R,T)] = I_
                 ort_solver.Add(I.StaysInSync(I_))
+
                 # if resources are fixed
                 if T.resources is not None and R in T.resources :
                     ort_solver.Add(I_.PerformedExpr() == 1)
+
             # one resource needs to get selected
             ort_solver.Add(ort_solver.Sum([I_.PerformedExpr() for I_ in RA_tasks]) == 1)
 
@@ -92,27 +103,41 @@ def solve(scenario,time_limit=None,copy_scenario=False,msg=False) :
 
     # resources
     sequences = collections.OrderedDict()
-    for R in S.resources() :
+    for R in S.resources():
+        # The DisjunctiveConstraint constraint forces all interval vars into an non-overlapping
+        # sequence. Intervals with zero duration can be scheduled anywhere.
+        # See https://github.com/google/or-tools/blob/v8.0/ortools/constraint_solver/constraint_solver.h#L5271
         disj = ort_solver.DisjunctiveConstraint(resource_to_intervals[R], R.name)
-        sequences[R] = disj.SequenceVar()
         ort_solver.Add(disj)
+        # stores this into the sequence dict
+        # documentation at
+        # https://developers.google.com/optimization/reference/python/constraint_solver/pywrapcp#sequencevar
+        sequences[R] = disj.SequenceVar()
 
-    # move objective
+    # objective function
+    # TODO: add whether the cost function is makespan or flowtime
     # TODO: bug, variables that are not part of the objective might not be finally defined
-    ort_objective_var = ort_solver.Sum([task_to_interval[T].EndExpr()*T.delay_cost
-                                         for T in S.tasks() if T in task_to_interval
-                                         and 'delay_cost' in T])
+    # define the cost
+    costs_to_consider = []
+    for T in S.tasks():
+        if T in task_to_interval and 'delay_cost' in T:
+            cost_contribution = task_to_interval[T].EndExpr() * T.delay_cost
+            costs_to_consider.append(cost_contribution)
+    ort_objective_var = ort_solver.Sum(costs_to_consider)
     ort_objective = ort_solver.Minimize(ort_objective_var, 1)
 
     # precedences lax
     for P in S.precs_lax():
         ort_solver.Add(task_to_interval[P.task_right].StartsAfterEnd(task_to_interval[P.task_left]))
         # TODO: add offset, but this requires DependecyGraph which is not exposed via swig?
-
+        
     # precedences tight
     for P in S.precs_tight():
-        ort_solver.Add(task_to_interval[P.task_right].StartsAtEnd(task_to_interval[P.task_left]))
-        # TODO: add offset, but this requires DependecyGraph which is not exposed via swig?
+        # if no offset
+        if P.offset == 0:
+            ort_solver.Add(task_to_interval[P.task_right].StartsAtEnd(task_to_interval[P.task_left]))
+        else:
+            ort_solver.Add(task_to_interval[P.task_right].StartsAfterEndWithDelay(task_to_interval[P.task_left], P.offset))
 
     # bound low
     for P in S.bounds_low():
