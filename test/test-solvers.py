@@ -31,17 +31,6 @@ def solve_gurobi(scenario):
 def solve_ortools(scenario):
     return solvers.ortools.solve(scenario, msg=msg)
 
-
-solve_methods = [
-solve_cbc,
-solve_glpk,
-solve_cbc_bigm,
-solve_ortools
-#solve_gurobi,
-#solve_scip,
-#solve_scip_bigm,
-]
-
 def two_task_scenario() :
     S = Scenario('Scenario_1',horizon=horizon)
     T1 = S.Task('T1')
@@ -233,6 +222,10 @@ def COSTPERPERIOD():
     sols = ['[(T1, R2, 0, 1), (T2, R2, 1, 2)]']
     return S,sols
 
+solve_methods = [solve_cbc,
+                 solve_glpk,
+                 solve_cbc_bigm,
+                 solve_ortools]
 
 scenario_methods = [
 ZERO,
@@ -256,8 +249,6 @@ CAPMAX,
 SCHEDULECOST,
 PERIODS
 ]
-
-#scenario_methods = [TIGHT]
 
 solve_method_names = collections.OrderedDict([ ('%s.%s' % (solve_method.__module__,solve_method.__name__),solve_method)
                                              for solve_method in solve_methods ])
@@ -294,19 +285,19 @@ with open('solvers.csv','w') as f :
     f.close()
 
 # plot table to screen
-print('################ Results #########################')
-try :
+print('########### Results (O=test passes, X=test fails########')
+try:
     import pandas as pd
     df = pd.DataFrame(table[1:])
     # take last two elements in method name
     df.columns = ['scenario'] + [ '.'.join(x.split('.')[-2:]) for x in table[0][1:] ]
     df = df.set_index('scenario')
-    df = df.replace(True,'X').replace(False,'')
+    df = df.replace(True,'O').replace(False,'X')
     print(df)
     with open('tmp.html','w') as f:
         f.write(df.to_html())
         f.close()
-except :
+except ModuleNotFoundError:
     print('INFO: install pandas to get nicer table plot')
     print(table)
 print('##################################################')
