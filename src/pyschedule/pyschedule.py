@@ -28,21 +28,21 @@ import types
 import warnings
 
 
-def _isnumeric(var) :
+def _isnumeric(var):
     """
     Test if var is numeric, only integers are allowed
     """
     return isinstance(var, int)
 
 
-def _isiterable(var) :
+def _isiterable(var):
     """
     Test if var is iterable
     """
     return isinstance(var, (list, set, tuple, _List))
 
 
-def alt(*args) :
+def alt(*args):
     """
     Method to reduce the given elements with the or-operator
     e.g. alt([R1,R2,R3]) = R1|R2|R3
@@ -53,7 +53,7 @@ def alt(*args) :
 
 
 class _SchedElement:
-    def __init__(self, name='') :
+    def __init__(self, name=''):
         if not isinstance(name, str):
             raise Exception('ERROR: name %s is not a string'%str(name))
         if 'start' in name or 'end' in name:
@@ -63,24 +63,24 @@ class _SchedElement:
             raise Exception('ERROR: name %s contains one of the following characters: -+[] ->/'%name)
         self.name = name
 
-    def __str__(self) :
+    def __str__(self):
         return str(self.name)
 
-    def __repr__(self) :
+    def __repr__(self):
         return self.__str__()
 
-    def __hash__(self) :
+    def __hash__(self):
         return self.name.__hash__()
 
 
 class _SchedElementAffine:
-    def __init__(self,unknown=None,affine_operator='+') :
+    def __init__(self,unknown=None,affine_operator='+'):
         self.map = OrderedDict()
         # map_obj is for the case that the coefficient is e.g. a resource with a coefficient
         # then the resource will be saved in map_obj
         self.map_obj = OrderedDict()
         self.affine_operator = affine_operator
-        if isinstance(unknown,type(self)) :
+        if isinstance(unknown,type(self)):
             self.map.update(unknown.map)
             self.map_obj.update(unknown.map)
         else:
@@ -105,24 +105,24 @@ class _SchedElementAffine:
         return self.map.__len__()
 
     def __add__(self,other):
-        if isinstance(other,type(self)) :
+        if isinstance(other,type(self)):
             new = self.copy()
-            for key in other :
+            for key in other:
                 new[key] = other[key]
                 new.map_obj[key] = other.map_obj[key]
             return new
         return self + type(self)(other)
 
-    def __sub__(self,other) :
-        if isinstance(other,type(self)) :
+    def __sub__(self,other):
+        if isinstance(other,type(self)):
             new = self.copy()
-            for key in other :
+            for key in other:
                 new[key] = -other[key]
                 new.map_obj[key] = other.map_obj[key]
             return new
         return self - type(self)(other)
 
-    def __radd__(self,other) :
+    def __radd__(self,other):
         return self + other
 
     def __iadd__(self,other):
@@ -154,9 +154,9 @@ class _SchedElementAffine:
             new.map_obj[key] = self.map_obj[key]
         return new
 
-    def __str__(self) :
-        def format_coeff(key) :
-            if self[key] != 1 :
+    def __str__(self):
+        def format_coeff(key):
+            if self[key] != 1:
                 return '*'+str(self[key])
             return ''
         def format_obj(key):
@@ -168,7 +168,7 @@ class _SchedElementAffine:
     def __repr__(self):
         return self.__str__()
 
-    def __hash__(self) :
+    def __hash__(self):
         return self.__repr__().__hash__()
 
 
@@ -182,37 +182,37 @@ class _List(list):
             return zip(self,other)
         return ( (T,other) for T in self )
 
-    def __lt__(self,other) :
+    def __lt__(self,other):
         return _List([T < T_ for (T,T_) in self._pair(other)])
 
-    def __gt__(self,other) :
+    def __gt__(self,other):
         return _List([T > T_ for (T,T_) in self._pair(other)])
 
-    def __le__(self,other) :
+    def __le__(self,other):
         return _List([T <= T_ for (T,T_) in self._pair(other)])
 
-    def __ge__(self,other) :
+    def __ge__(self,other):
         return _List([T >= T_ for (T,T_) in self._pair(other)])
 
-    def __ne__(self,other) :
+    def __ne__(self,other):
         return _List([T != T_ for (T,T_) in self._pair(other)])
 
-    def __lshift__(self,other) :
+    def __lshift__(self,other):
         return _List([T << T_ for (T,T_) in self._pair(other)])
 
-    def __rshift__(self,other) :
+    def __rshift__(self,other):
         return _List([T >> T_ for (T,T_) in self._pair(other)])
 
-    def __add__(self,other) :
+    def __add__(self,other):
         return _List([T + T_ for (T,T_) in self._pair(other)])
 
-    def __sub__(self,other) :
+    def __sub__(self,other):
         return _List([T - T_ for (T,T_) in self._pair(other)])
 
-    def __radd__(self,other) :
+    def __radd__(self,other):
         return _List([T + T_ for (T,T_) in self._pair(other)])
 
-    def __rsub__(self,other) :
+    def __rsub__(self,other):
         return _List([T - T_ for (T,T_) in self._pair(other)])
 
     def __iadd__(self,other):
@@ -221,7 +221,7 @@ class _List(list):
     def __isub__(self,other):
         return _List([T.__isub__(other) for T in self])
 
-    def __mul__(self,other) :
+    def __mul__(self,other):
         if not _isiterable(other) and not isinstance(other,_ResourceAffine):
             return _List([T*T_ for (T,T_) in self._pair(other)])
         return _List([_List([T*T_ for T_ in other]) for T in self])
@@ -250,7 +250,7 @@ class Scenario(_SchedElement):
         self.horizon = horizon
         self._tasks = OrderedDict() #tasks
         self._resources = OrderedDict() #resources
-        self._constraints = list()
+        self._constraints = []
 
         # start and end times, should be datetime
         self.start_time = start_time
@@ -281,15 +281,15 @@ class Scenario(_SchedElement):
         print("Horizon (number of time increments):", self.horizon)
         print("Step time:", self.steptime)
 
-    def Task(self,name,length=1,periods=None,group=None,schedule_cost=None,delay_cost=None,**kwargs) :
+    def Task(self,name,length=1,periods=None,group=None,schedule_cost=None,delay_cost=None,**kwargs):
         """
         Adds a new task to the scenario
-        name : unique task name, must not contain special characters
-        length : length of task, default is 1
-        periods : fixed set of periods when the task can be scheduled
-        group : task group. Tasks in same task group must be completely interchangeable
-        schedule_cost : additional cost if job is scheduled. If cost is negative, then this can be used as a reward
-        delay_cost : cost for each period a job is delayed after period 0
+        name: unique task name, must not contain special characters
+        length: length of task, default is 1
+        periods: fixed set of periods when the task can be scheduled
+        group: task group. Tasks in same task group must be completely interchangeable
+        schedule_cost: additional cost if job is scheduled. If cost is negative, then this can be used as a reward
+        delay_cost: cost for each period a job is delayed after period 0
         """
         if name in self._tasks or name in self._resources:
             raise Exception('ERROR: resource or task with name %s already contained in scenario'%str(name))
@@ -305,7 +305,7 @@ class Scenario(_SchedElement):
         self.add_task(task)
         return task
 
-    def Tasks(self,name,num=1,is_group=False,**kwargs) :
+    def Tasks(self,name,num=1,is_group=False,**kwargs):
         tasks = TaskList(name=name,num=num,is_group=is_group,**kwargs)
         for T in tasks:
             #if T.periods is None:
@@ -313,24 +313,24 @@ class Scenario(_SchedElement):
             self.add_task(T)
         return tasks
 
-    def tasks(self,resource=None) :
+    def tasks(self,resource=None):
         """
         Returns all tasks in scenario
         """
-        if resource is None :
+        if resource is None:
             return list(self._tasks.values())
-        else :
+        else:
             return list({ T for T in self.tasks() for RA in T.resources_req if resource in RA })
 
-    def Resource(self,name,size=1,periods=None,group=None,cost_per_period=None,**kwargs) :
+    def Resource(self,name,size=1,periods=None,group=None,cost_per_period=None,**kwargs):
         """
         Adds a new resource to the scenario
-        name   : unique resource name, must not contain special characters
-        size   : the size of the resource, if size > 1, then we get a cumulative resource that can process
+        name  : unique resource name, must not contain special characters
+        size  : the size of the resource, if size > 1, then we get a cumulative resource that can process
                 different tasks in parallel
-        periods : the periods which are available for scheduling
-        group : resource group. Resources in same resource group must be completely interchangeable
-        cost_per_period : the cost for one period
+        periods: the periods which are available for scheduling
+        group: resource group. Resources in same resource group must be completely interchangeable
+        cost_per_period: the cost for one period
         """
         if name in self._tasks or name in self._resources:
             raise Exception('ERROR: resource or task with name %s already contained in scenario'%str(name))
@@ -340,7 +340,7 @@ class Scenario(_SchedElement):
         self.add_resource(resource)
         return resource
 
-    def Resources(self,name,num=1,is_group=False,**kwargs) :
+    def Resources(self,name,num=1,is_group=False,**kwargs):
         resources = ResourceList(name=name,num=num,is_group=is_group,**kwargs)
         for R in resources:
             #if R.periods is None:
@@ -348,11 +348,11 @@ class Scenario(_SchedElement):
             self.add_resource(R)
         return resources
 
-    def resources(self,task=None) :
+    def resources(self,task=None):
         """
         Returns all resources in scenario
         """
-        if task is None :
+        if task is None:
             return list(self._resources.values())
         return list({ R for RA in task.resources_req for R in RA })
 
@@ -360,7 +360,7 @@ class Scenario(_SchedElement):
         """
         Returns a mapping of resource requirements to tasks. This is helpful if resources requirements
         are jointly used by different tasks. Only resource requiremenets
-        min_size : the minimum number of tasks in resources req, default is 2
+        min_size: the minimum number of tasks in resources req, default is 2
         """
         ra_to_tasks = dict()
         for T in self.tasks():
@@ -373,7 +373,7 @@ class Scenario(_SchedElement):
                     ra_to_tasks[RA].add(T)
         return ra_to_tasks
 
-    def solution(self) :
+    def solution(self):
         """
         Returns the last computed solution in tabular form with columns: task, resource, start, end
         """
@@ -383,7 +383,7 @@ class Scenario(_SchedElement):
                     for R in T.resources
                    ]
         # sort according to start and name
-        solution = sorted(solution, key = lambda x : (x[2],str(x[0]),str(x[1])) )
+        solution = sorted(solution, key = lambda x: (x[2],str(x[0]),str(x[1])) )
         return solution
 
     def objective(self):
@@ -395,14 +395,14 @@ class Scenario(_SchedElement):
             return functools.reduce(lambda x,y:x+y,tasks_objective)
         return None
 
-    def objective_value(self) :
+    def objective_value(self):
         """
         Returns the value of the objective
         """
         return sum([T['_delay_cost']*(T.start_value+T.length) for T in self.tasks()
                     if '_delay_cost' in T])
 
-    def use_makespan_objective(self) :
+    def use_makespan_objective(self):
         """
         Set the objective to the makespan of all included tasks.
         https://en.wikipedia.org/wiki/Makespan
@@ -415,17 +415,17 @@ class Scenario(_SchedElement):
         self.clear_objective()
         if not self.tasks():
             return
-        if 'MakeSpan' in self._tasks :
+        if 'MakeSpan' in self._tasks:
             self._constraints = [C for C in self._constraints if self._tasks['MakeSpan'] not in C.tasks()]
             del self._tasks['MakeSpan']
         tasks = self.tasks() # save tasks before adding makespan
         makespan = self.Task('MakeSpan')
         makespan += self.resources()[0] # add first resource, every task needs one
-        for T in tasks :
+        for T in tasks:
             self += T < makespan
         self += makespan*1
 
-    def use_flowtime_objective(self) :
+    def use_flowtime_objective(self):
         """
         Sets the objective to a uniform flow-time objective.
         Flow time: The amount of time a flow unit spends in a business process
@@ -440,7 +440,7 @@ class Scenario(_SchedElement):
         """
         Remove the solution from the scenario
         """
-        for T in self.tasks() :
+        for T in self.tasks():
             T.start_value = None
             T.resources = None
 
@@ -465,16 +465,16 @@ class Scenario(_SchedElement):
     def precs_cond(self):
         return self.constraints(PrecedenceCond)
 
-    def bounds_low(self) :
+    def bounds_low(self):
         return self.constraints(BoundLow)
 
-    def bounds_up(self) :
+    def bounds_up(self):
         return self.constraints(BoundUp)
 
-    def bounds_low_tight(self) :
+    def bounds_low_tight(self):
         return self.constraints(BoundLowTight)
 
-    def bounds_up_tight(self) :
+    def bounds_up_tight(self):
         return self.constraints(BoundUpTight)
 
     def capacity(self):
@@ -503,9 +503,9 @@ class Scenario(_SchedElement):
             self._tasks[task.name] = task
 
     def remove_task(self,task):
-        if task.name in self._tasks :
+        if task.name in self._tasks:
             del self._tasks[task.name]
-        else :
+        else:
             raise Exception('ERROR: task with name %s not contained in scenario %s' % (str(task.name),str(self.name)))
         self._constraints = [C for C in self._constraints if task not in C.tasks()]
 
@@ -524,7 +524,7 @@ class Scenario(_SchedElement):
             self._resources[resource.name] = resource
 
     def remove_resource(self,resource):
-        if resource.name in self._resources :
+        if resource.name in self._resources:
             del self._resources[resource.name]
         else:
             raise Exception('ERROR: resource with name %s not contained in scenario %s'%
@@ -540,30 +540,30 @@ class Scenario(_SchedElement):
             return list(range(self.horizon))
         return el.periods
 
-    def __iadd__(self,other) :
-        if _isiterable(other) :
-            for x in other :
+    def __iadd__(self,other):
+        if _isiterable(other):
+            for x in other:
                 self += x
             return self
-        elif isinstance(other,_Constraint) :
+        elif isinstance(other,_Constraint):
             self.add_constraint(other)
             return self
-        elif isinstance(other,Task) :
+        elif isinstance(other,Task):
             self.add_task(other)
             return self
-        elif isinstance(other,_TaskAffine) :
+        elif isinstance(other,_TaskAffine):
             self.add_task_affine(other)
             return self
-        elif isinstance(other,Resource) :
+        elif isinstance(other,Resource):
             self.add_resource(self,other)
             return self
         raise Exception('ERROR: cant add %s to scenario %s'%(str(other),str(self.name)))
 
-    def __isub__(self,other) :
+    def __isub__(self,other):
         if _isiterable(other):
             for x in other:
                 self -= x
-        elif isinstance(other,Task) :
+        elif isinstance(other,Task):
             self.remove_task(other)
         elif isinstance(other,Resource):
             self.remove_resource(other)
@@ -602,7 +602,7 @@ class Scenario(_SchedElement):
             if not T.resources_req:
                 raise Exception('ERROR: task %s has no resource requirement'%str(T))
 
-    def __str__(self) :
+    def __str__(self):
         s = '###############################################\n'
         s += '\n'
         s += 'SCENARIO: '+self.name
@@ -614,13 +614,13 @@ class Scenario(_SchedElement):
         s += 'OBJECTIVE: '+str(self.objective())+'\n\n'
 
         s += 'RESOURCES:\n'
-        for R in self.resources() :
+        for R in self.resources():
             s += str(R.name)+'\n'
         s += '\n'
 
         s += 'TASKS:\n'
-        for T in self.tasks() :
-            s += '%s : %s\n'%(str(T.name),','.join([str(RA) for RA in T.resources_req]))
+        for T in self.tasks():
+            s += '%s: %s\n'%(str(T.name),','.join([str(RA) for RA in T.resources_req]))
         s += '\n'
 
         s += 'JOINT RESOURCES:\n'
@@ -628,7 +628,7 @@ class Scenario(_SchedElement):
         for RA in ra_to_tasks:
             if len(RA) < 2:
                 continue
-            s += '%s : %s\n'%(str(RA),','.join([str(T) for T in ra_to_tasks[RA]]))
+            s += '%s: %s\n'%(str(RA),','.join([str(T) for T in ra_to_tasks[RA]]))
         s += '\n'
 
         def print_constraint(title,constraints):
@@ -650,12 +650,11 @@ class Scenario(_SchedElement):
         return s
 
 
-
-class Task(_SchedElement) :
+class Task(_SchedElement):
     """
     A task to be processed by at least one resource
     """
-    def __init__(self,name,length=1,group=None,periods=None,schedule_cost=None,delay_cost=None,**kwargs) :
+    def __init__(self,name,length=1,group=None,periods=None,schedule_cost=None,delay_cost=None,**kwargs):
         _SchedElement.__init__(self,name)
         if not _isnumeric(length):
             raise Exception('ERROR: task length must be an integer')
@@ -667,50 +666,50 @@ class Task(_SchedElement) :
         # additional parameters
         self.start_value = None # should be filled by solver
         self.resources = None # should be filled by solver
-        self.resources_req = list() # required resources
-        self.tasks_req = list() # resource usage is inherited from these tasks
+        self.resources_req = [] # required resources
+        self.tasks_req = [] # resource usage is inherited from these tasks
         self.schedule_cost = schedule_cost # in case not None, then the task is optional adds the schedule_cost to the objective if the task is scheduled
         self.delay_cost = delay_cost # cost on the final completion time
 
         for key in kwargs:
             self.__setattr__(key,kwargs[key])
 
-    def __len__(self) :
+    def __len__(self):
         return self.length
 
-    def __lt__(self,other) :
+    def __lt__(self,other):
         return _TaskAffine(self) < other
 
-    def __gt__(self,other) :
+    def __gt__(self,other):
         return _TaskAffine(self) > other
 
-    def __le__(self,other) :
+    def __le__(self,other):
         return _TaskAffine(self) <= other
 
-    def __ge__(self,other) :
+    def __ge__(self,other):
         return _TaskAffine(self) >= other
 
-    def __ne__(self,other) :
+    def __ne__(self,other):
         return _TaskAffine(self) != other
 
-    def __lshift__(self,other) :
+    def __lshift__(self,other):
         return _TaskAffine(self) << other
 
-    def __rshift__(self,other) :
+    def __rshift__(self,other):
         return _TaskAffine(self) >> other
 
-    def __add__(self,other) :
+    def __add__(self,other):
         return _TaskAffine(self) + other
 
-    def __sub__(self,other) :
+    def __sub__(self,other):
         return _TaskAffine(self) - other
 
-    def __mul__(self,other) :
+    def __mul__(self,other):
         if _isiterable(other):
             return [self*el for el in other]
         return _TaskAffine(self) * other
 
-    def __radd__(self,other) :
+    def __radd__(self,other):
         return _TaskAffine(self) + other
 
     def add_resources_req(self,RA):
@@ -792,7 +791,6 @@ class Task(_SchedElement) :
         self.__dict__[attr] = value
 
 
-
 class TaskList(_List):
     """
     A list of tasks
@@ -805,7 +803,6 @@ class TaskList(_List):
         for i in range(num):
             name_ = '%s%i'%(name,i)
             self.append(Task(name=name_,group=group,**kwargs))
-
 
 
 class ResourceList(_List):
@@ -822,15 +819,15 @@ class ResourceList(_List):
             self.append(Resource(name=name_,group=group,**kwargs))
 
 
-class _TaskAffine(_SchedElementAffine) :
-    def __init__(self,unknown=None) :
+class _TaskAffine(_SchedElementAffine):
+    def __init__(self,unknown=None):
         _SchedElementAffine.__init__(self,unknown=unknown)
 
-    def _get_prec(self,TA,comp_operator) :
+    def _get_prec(self,TA,comp_operator):
         pos_tasks = [T for T in TA if isinstance(T,Task) and TA[T] >= 0]
         neg_tasks = [T for T in TA if isinstance(T,Task) and TA[T] < 0]
         offsets = [T*TA[T] for T in TA if _isnumeric(T)]
-        if len(neg_tasks) > 1 or len(pos_tasks) > 1 or len(offsets) > 1 :
+        if len(neg_tasks) > 1 or len(pos_tasks) > 1 or len(offsets) > 1:
             raise Exception('ERROR: can only deal with simple precedences of \
                                     the form T1 + 3 < T2 or T1 < 3 and not %s'%str(TA) )
 
@@ -838,17 +835,17 @@ class _TaskAffine(_SchedElementAffine) :
         offset = 0
         if offsets:
             offset = offsets[0]
-        if pos_tasks and neg_tasks :
+        if pos_tasks and neg_tasks:
             left = pos_tasks[0]
             right = neg_tasks[0]
             resource_left = TA.map_obj[left]
             resource_right = TA.map_obj[right]
 
-            if comp_operator == '<' :
+            if comp_operator == '<':
                 return PrecedenceLax(task_left=left,resource_left=resource_left,task_right=right,resource_right=resource_right,offset=offset)
-            elif comp_operator == '<=' :
+            elif comp_operator == '<=':
                 return PrecedenceTight(task_left=left,resource_left=resource_left,task_right=right,resource_right=resource_right,offset=offset)
-            elif comp_operator == '<<' :
+            elif comp_operator == '<<':
                 return PrecedenceCond(task_left=left,resource_left=resource_left,task_right=right,resource_right=resource_right,offset=offset)
         elif pos_tasks and not neg_tasks:
             left = pos_tasks[0]
@@ -874,53 +871,52 @@ class _TaskAffine(_SchedElementAffine) :
                 return BoundUpTight(task=left,bound=right)
         raise Exception('ERROR: sth is wrong')
 
-    def __lt__(self,other) :
-        if _isiterable(other) :
+    def __lt__(self,other):
+        if _isiterable(other):
             return [self < x for x in other]
-        if not isinstance(other,type(self)) :
+        if not isinstance(other,type(self)):
             return self < _TaskAffine(other)
         return self._get_prec(self-other,'<')
 
-    def __gt__(self,other) :
-        if _isiterable(other) :
+    def __gt__(self,other):
+        if _isiterable(other):
             return [self > x for x in other]
-        if not isinstance(other,type(self)) :
+        if not isinstance(other,type(self)):
             return self > _TaskAffine(other)
         return _TaskAffine(other) < self
 
-    def __le__(self,other) :
-        if _isiterable(other) :
+    def __le__(self,other):
+        if _isiterable(other):
             return [self <= x for x in other]
-        if not isinstance(other,type(self)) :
+        if not isinstance(other,type(self)):
             return self <= _TaskAffine(other)
         return self._get_prec(self-other,'<=')
 
-    def __ge__(self,other) :
-        if _isiterable(other) :
+    def __ge__(self,other):
+        if _isiterable(other):
             return [self >= x for x in other]
-        if not isinstance(other,type(self)) :
+        if not isinstance(other,type(self)):
             return self >= _TaskAffine(other)
         return _TaskAffine(other) <= self
 
-    def __lshift__(self,other) :
-        if _isiterable(other) :
+    def __lshift__(self,other):
+        if _isiterable(other):
             return [self << x for x in other]
-        if not isinstance(other,type(self)) :
+        if not isinstance(other,type(self)):
             return self << _TaskAffine(other)
         return self._get_prec(self-other,'<<')
 
-    def __rshift__(self,other) :
-        if _isiterable(other) :
+    def __rshift__(self,other):
+        if _isiterable(other):
             return [self >> x for x in other]
-        if not isinstance(other,type(self)) :
+        if not isinstance(other,type(self)):
             return self >> _TaskAffine(other)
         return _TaskAffine(other) << self
 
 
-
-class _Constraint(_SchedElement) :
-
-    def __init__(self) :
+class _Constraint(_SchedElement):
+    """ An abstract class """
+    def __init__(self):
         _SchedElement.__init__(self)
 
     def tasks(self):
@@ -930,74 +926,67 @@ class _Constraint(_SchedElement) :
         return list()
 
 
-
-class _Bound(_Constraint) :
-
-    def __init__(self,task,bound) :
+class _Bound(_Constraint):
+    def __init__(self,task,bound):
         _Constraint.__init__(self)
         self.task = task
         self.bound = bound
         self.comp_operator = '<'
 
-    def tasks(self) :
+    def tasks(self):
         return [self.task]
 
-    def __repr__(self) :
+    def __repr__(self):
         return str(self.task) + ' ' + str(self.comp_operator) + ' ' + str(self.bound)
 
-    def __str__(self) :
+    def __str__(self):
         return self.__repr__()
 
-    def __hash__(self) :
+    def __hash__(self):
         return self.__repr__().__hash__()
 
 
-
-class BoundLow(_Bound) :
+class BoundLow(_Bound):
     """
     A bound of the form T > 3
     """
-    def __init__(self,task,bound) :
+    def __init__(self,task,bound):
         _Bound.__init__(self,task,bound)
         self.comp_operator = '>'
 
 
-
-class BoundUp(_Bound) :
+class BoundUp(_Bound):
     """
     A bound of the form T < 3
     """
-    def __init__(self,task,bound) :
+    def __init__(self,task,bound):
         _Bound.__init__(self,task,bound)
         self.comp_operator = '<'
 
 
-
-class BoundLowTight(_Bound) :
+class BoundLowTight(_Bound):
     """
     A bound of the form T >= 3
     """
-    def __init__(self,task,bound) :
+    def __init__(self,task,bound):
         _Bound.__init__(self,task,bound)
         self.comp_operator = '>='
 
 
-
-class BoundUpTight(_Bound) :
+class BoundUpTight(_Bound):
     """
     A bound of the form T <= 3
     """
-    def __init__(self,task,bound) :
+    def __init__(self,task,bound):
         _Bound.__init__(self,task,bound)
         self.comp_operator = '<='
 
 
-
-class _Precedence(_Constraint) :
+class _Precedence(_Constraint):
     """
     A precedence constraint of two tasks, left and right, and an offset.
     """
-    def __init__(self,task_left,resource_left,task_right,resource_right,offset=0) :
+    def __init__(self,task_left,resource_left,task_right,resource_right,offset=0):
         _Constraint.__init__(self)
         self.task_left = task_left
         self.resource_left = resource_left
@@ -1006,66 +995,62 @@ class _Precedence(_Constraint) :
         self.offset = offset
         self.comp_operator = '<'
 
-    def tasks(self) :
+    def tasks(self):
         return [self.task_left,self.task_right]
 
-    def __repr__(self) :
+    def __repr__(self):
         s = str(self.task_left)
         if self.resource_left is not None:
             s += '*'+str(self.resource_left)
         s += ' '
-        if self.offset > 0 :
+        if self.offset > 0:
             s += '+ ' + str(self.offset) + ' '
         s += str(self.comp_operator) + ' ' + str(self.task_right)
         if self.resource_right is not None:
             s += '*'+str(self.resource_right)
-        if self.offset < 0 :
+        if self.offset < 0:
             s += ' + ' + str(-self.offset) + ' '
         return s
 
-    def __str__(self) :
+    def __str__(self):
         return self.__repr__()
 
-    def __hash__(self) :
+    def __hash__(self):
         return self.__repr__().__hash__()
 
 
-
-class PrecedenceLax(_Precedence) :
+class PrecedenceLax(_Precedence):
     """
     A precedence of the form T1 + 3 < T2
     """
-    def __init__(self,task_left,resource_left,task_right,resource_right,offset=0) :
+    def __init__(self,task_left,resource_left,task_right,resource_right,offset=0):
         _Precedence.__init__(self,task_left,resource_left,task_right,resource_right,offset)
         self.comp_operator = '<'
 
 
-
-class PrecedenceTight(_Precedence) :
+class PrecedenceTight(_Precedence):
     """
     A precedence of the form T1 + 3 <= T2
     """
-    def __init__(self,task_left,resource_left,task_right,resource_right,offset=0) :
+    def __init__(self,task_left,resource_left,task_right,resource_right,offset=0):
         _Precedence.__init__(self,task_left,resource_left,task_right,resource_right,offset)
         self.comp_operator = '<='
 
 
-
-class PrecedenceCond(_Precedence) :
+class PrecedenceCond(_Precedence):
     """
     A precedence of the form T1 + 3 << T2
     """
-    def __init__(self,task_left,resource_left,task_right,resource_right,offset=0) :
+    def __init__(self,task_left,resource_left,task_right,resource_right,offset=0):
         _Precedence.__init__(self,task_left,resource_left,task_right,resource_right,offset)
         self.comp_operator = '<<'
 
 
-
-class Resource(_SchedElement) :
+class Resource(_SchedElement):
     """
     A resource which can processes tasks
     """
-    def __init__(self,name=None,size=1,group=None,periods=None,cost_per_period=None,**kwargs) :
+    def __init__(self,name=None,size=1,group=None,periods=None,cost_per_period=None,**kwargs):
         _SchedElement.__init__(self,name)
         self.size = size
         self.group = group
@@ -1077,10 +1062,10 @@ class Resource(_SchedElement) :
         #this is required for e.g. T0 <= T1*R
         self._coeff = 1
 
-    def __mul__(self,other) :
+    def __mul__(self,other):
         return _ResourceAffine(self).__mul__(other)
 
-    def __or__(self,other) :
+    def __or__(self,other):
         return _ResourceAffine(self) | other
 
     def __getitem__(self, key):
@@ -1092,7 +1077,6 @@ class Resource(_SchedElement) :
 
     def __ge__(self,other):
         return _Slice(resource=self) >= other
-
 
 
 class _ResourceAffine(_SchedElementAffine):
@@ -1219,19 +1203,19 @@ class _Slice(_SchedElement):
         self.kind = 'diff_inc'
         return self
 
-    def __mul__(self,other) :
+    def __mul__(self,other):
         return _SliceAffine(self).__mul__(other)
 
-    def __add__(self,other) :
+    def __add__(self,other):
         return _SliceAffine(self) + other
 
-    def __sub__(self,other) :
+    def __sub__(self,other):
         return _SliceAffine(self) - other
 
-    def __le__(self,other) :
+    def __le__(self,other):
         return _SliceAffine(self) <= other
 
-    def __ge__(self,other) :
+    def __ge__(self,other):
         return _SliceAffine(self) >= other
 
     def __str__(self):
@@ -1265,7 +1249,6 @@ class _Slice(_SchedElement):
         return self.__str__()
 
 
-
 class _SliceAffine(_SchedElementAffine):
     """
     linear combination of resource slices to be turned into a capacity contraint
@@ -1290,10 +1273,10 @@ class _SliceAffine(_SchedElementAffine):
             return self <= _SliceAffine(other)
         return self._get_cap(self-other)
 
-    def __ge__(self,other) :
-        if _isiterable(other) :
+    def __ge__(self,other):
+        if _isiterable(other):
             return [self >= x for x in other]
-        if not isinstance(other,type(self)) :
+        if not isinstance(other,type(self)):
             return self >= _SliceAffine(other)
         return self._get_cap(other-self)
 
