@@ -44,7 +44,12 @@ jobs:
     displayName: 'Test import and run simple test'
 
   - bash: |
-      source activate pyschenv && \    
+      source activate pyschenv && \
+      python test/test-features.py
+    displayName: 'Test features (unittest framework)'
+
+  - bash: |
+      source activate pyschenv && \
       python test/test-solvers.py
     displayName: 'Test solvers'
 

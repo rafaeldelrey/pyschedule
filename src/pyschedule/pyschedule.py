@@ -28,13 +28,6 @@ import types
 import warnings
 
 
-def _isnumeric(var):
-    """
-    Test if var is numeric, only integers are allowed
-    """
-    return isinstance(var, int)
-
-
 def _isiterable(var):
     """
     Test if var is iterable
@@ -136,7 +129,7 @@ class _SchedElementAffine:
     def __mul__(self,other):
         new = copy.copy(self)
         for key in new.map:
-            if _isnumeric(other):
+            if isinstance(other, int):
                 new.map[key] = other
             else:
                 new.map_obj[key] = other
@@ -292,7 +285,7 @@ class Scenario(_SchedElement):
         delay_cost: cost for each period a job is delayed after period 0
         """
         if name in self._tasks or name in self._resources:
-            raise Exception('ERROR: resource or task with name %s already contained in scenario'%str(name))
+            raise NameError('ERROR: resource or task with name %s already contained in scenario'%str(name))
         #if periods is None and self.horizon is not None:
         #   periods = list(range(self.horizon))
         task = Task(name=name,
@@ -656,8 +649,8 @@ class Task(_SchedElement):
     """
     def __init__(self,name,length=1,group=None,periods=None,schedule_cost=None,delay_cost=None,**kwargs):
         _SchedElement.__init__(self,name)
-        if not _isnumeric(length):
-            raise Exception('ERROR: task length must be an integer')
+        if not isinstance(length, int):
+            raise ValueError('Task length must be an integer')
         # base parameters
         self.length = length # length of task
         self.group = group # group exchangeable tasks
@@ -826,7 +819,7 @@ class _TaskAffine(_SchedElementAffine):
     def _get_prec(self,TA,comp_operator):
         pos_tasks = [T for T in TA if isinstance(T,Task) and TA[T] >= 0]
         neg_tasks = [T for T in TA if isinstance(T,Task) and TA[T] < 0]
-        offsets = [T*TA[T] for T in TA if _isnumeric(T)]
+        offsets = [T*TA[T] for T in TA if isinstance(T, int)]
         if len(neg_tasks) > 1 or len(pos_tasks) > 1 or len(offsets) > 1:
             raise Exception('ERROR: can only deal with simple precedences of \
                                     the form T1 + 3 < T2 or T1 < 3 and not %s'%str(TA) )
@@ -1261,7 +1254,7 @@ class _SliceAffine(_SchedElementAffine):
         # sum up offset
         offset = 0
         for SL in SLA:
-            if _isnumeric(SL):
+            if isinstance(SL, int):
                 offset -= SL*SLA[SL]
                 del SLA_[SL]
         return Capacity(SLA=SLA_,bound=offset)
