@@ -28,8 +28,8 @@ def solve_scip_bigm(scenario):
 def solve_gurobi(scenario):
     return solvers.mip.solve(scenario,kind='GUROBI',msg=msg)
 
-def solve_ortools(scenario):
-    return solvers.ortools.solve(scenario, msg=msg)
+def solve_ortools_cp_sat(scenario):
+    return solvers.ortools_cp_sat.solve(scenario, msg=msg)
 
 def two_task_scenario() :
     S = Scenario('Scenario_1',horizon=horizon)
@@ -225,7 +225,7 @@ def COSTPERPERIOD():
 solve_methods = [solve_cbc,
                  solve_glpk,
                  solve_cbc_bigm,
-                 solve_ortools]
+                 solve_ortools_cp_sat]
 
 scenario_methods = [
 ZERO,

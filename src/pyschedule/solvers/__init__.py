@@ -20,15 +20,15 @@ specific language governing permissions and limitations
 under the License.
 '''
 
-"""
+__doc__ = """
 This module contains solvers that accept the pyschedule scenario format
 as input. Each solver should correspond to a class which offers the
 method "solve" that takes a scenario as minimal input. If a solution
-exists, then a 0 should be returned, otherwise a 1. The optimal solution
+exists, then a True should be returned, otherwise a False. The optimal solution
 should be directly written to the passed scenario
 """
 
 from . import mip
 from . import mip_bigm
-from . import ortools
+from . import ortools_cp_sat
 from . import listsched
