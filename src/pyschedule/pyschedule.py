@@ -25,6 +25,7 @@ from collections import OrderedDict
 import copy
 import functools
 import types
+import uuid
 import warnings
 
 
@@ -48,13 +49,15 @@ def alt(*args):
 class _SchedElement:
     def __init__(self, name=''):
         if not isinstance(name, str):
-            raise Exception('ERROR: name %s is not a string'%str(name))
+            raise Exception('Name %s is not a string'%str(name))
         if 'start' in name or 'end' in name:
             raise Exception('ERROR: avoid the substring "start" and "end" in any names, this will cause problems with solvers')
         trans = str.maketrans("-+[] ->/","________")
         if name.translate(trans) != name:
             raise Exception('ERROR: name %s contains one of the following characters: -+[] ->/'%name)
         self.name = name
+        # the unique id of each _SchedElement. This is uses for hashing
+        self._uid = uuid.uuid4().int
 
     def __str__(self):
         return str(self.name)
@@ -63,7 +66,7 @@ class _SchedElement:
         return self.__str__()
 
     def __hash__(self):
-        return self.name.__hash__()
+        return self._uid
 
 
 class _SchedElementAffine:
@@ -79,6 +82,8 @@ class _SchedElementAffine:
         else:
             self.map[unknown] = 1
             self.map_obj[unknown] = None
+        # unique id, used for hash
+        self._uid = uuid.uuid4().int
 
     def __getitem__(self,key):
         return self.map[key]
@@ -162,7 +167,7 @@ class _SchedElementAffine:
         return self.__str__()
 
     def __hash__(self):
-        return self.__repr__().__hash__()
+        return self._uid
 
 
 class _List(list):
@@ -239,7 +244,7 @@ class Scenario(_SchedElement):
     """
     def __init__(self,name='Unnamed',horizon=None,start_time=None,
                  end_time=None,steptime=None, duration=None):
-        _SchedElement.__init__(self,name)
+        super().__init__(name)
         self.horizon = horizon
         self._tasks = OrderedDict() #tasks
         self._resources = OrderedDict() #resources
@@ -550,7 +555,7 @@ class Scenario(_SchedElement):
         elif isinstance(other,Resource):
             self.add_resource(self,other)
             return self
-        raise Exception('ERROR: cant add %s to scenario %s'%(str(other),str(self.name)))
+        raise TypeError('Can''t add %s to scenario %s'%(str(other),str(self.name)))
 
     def __isub__(self,other):
         if _isiterable(other):
@@ -648,7 +653,7 @@ class Task(_SchedElement):
     A task to be processed by at least one resource
     """
     def __init__(self,name,length=1,group=None,periods=None,schedule_cost=None,delay_cost=None,**kwargs):
-        _SchedElement.__init__(self,name)
+        super().__init__(name)
         if not isinstance(length, int):
             raise ValueError('Task length must be an integer')
         # base parameters
@@ -705,13 +710,14 @@ class Task(_SchedElement):
     def __radd__(self,other):
         return _TaskAffine(self) + other
 
-    def add_resources_req(self,RA):
-        if RA in self.resources_req:
-            return self
-        self.resources_req.append(RA)
+    def add_resources_req(self, resource):
+        if resource not in self.resources_req:
+            self.resources_req.append(resource)
+        else:
+            raise ValueError("Resource requirements already set")
         return self
 
-    def remove_resources_req(self,RA):
+    def remove_resources_req(self, RA):
         self.resources_req = [RA_ for RA_ in self.resources_req if str(RA_) != str(RA)]
         return self
 
@@ -814,7 +820,7 @@ class ResourceList(_List):
 
 class _TaskAffine(_SchedElementAffine):
     def __init__(self,unknown=None):
-        _SchedElementAffine.__init__(self,unknown=unknown)
+        super().__init__(unknown=unknown)
 
     def _get_prec(self,TA,comp_operator):
         pos_tasks = [T for T in TA if isinstance(T,Task) and TA[T] >= 0]
@@ -910,7 +916,8 @@ class _TaskAffine(_SchedElementAffine):
 class _Constraint(_SchedElement):
     """ An abstract class """
     def __init__(self):
-        _SchedElement.__init__(self)
+        super().__init__()
+        self._uid = uuid.uuid4().int
 
     def tasks(self):
         return list()
@@ -918,13 +925,15 @@ class _Constraint(_SchedElement):
     def resources(self):
         return list()
 
+    def __hash__(self):
+        return self._uid
 
 class _Bound(_Constraint):
-    def __init__(self,task,bound):
-        _Constraint.__init__(self)
+    def __init__(self, task, bound):
+        super().__init__()
         self.task = task
         self.bound = bound
-        self.comp_operator = '<'
+        self.comp_operator = None
 
     def tasks(self):
         return [self.task]
@@ -935,16 +944,12 @@ class _Bound(_Constraint):
     def __str__(self):
         return self.__repr__()
 
-    def __hash__(self):
-        return self.__repr__().__hash__()
-
-
 class BoundLow(_Bound):
     """
     A bound of the form T > 3
     """
-    def __init__(self,task,bound):
-        _Bound.__init__(self,task,bound)
+    def __init__(self, task, bound):
+        super().__init__(task, bound)
         self.comp_operator = '>'
 
 
@@ -952,8 +957,8 @@ class BoundUp(_Bound):
     """
     A bound of the form T < 3
     """
-    def __init__(self,task,bound):
-        _Bound.__init__(self,task,bound)
+    def __init__(self, task, bound):
+        super().__init__(task, bound)
         self.comp_operator = '<'
 
 
@@ -962,7 +967,7 @@ class BoundLowTight(_Bound):
     A bound of the form T >= 3
     """
     def __init__(self,task,bound):
-        _Bound.__init__(self,task,bound)
+        super().__init__(task, bound)
         self.comp_operator = '>='
 
 
@@ -971,7 +976,7 @@ class BoundUpTight(_Bound):
     A bound of the form T <= 3
     """
     def __init__(self,task,bound):
-        _Bound.__init__(self,task,bound)
+        super().__init__(task, bound)
         self.comp_operator = '<='
 
 
@@ -979,17 +984,17 @@ class _Precedence(_Constraint):
     """
     A precedence constraint of two tasks, left and right, and an offset.
     """
-    def __init__(self,task_left,resource_left,task_right,resource_right,offset=0):
-        _Constraint.__init__(self)
+    def __init__(self, task_left, resource_left, task_right, resource_right, offset=0):
+        super().__init__()
         self.task_left = task_left
         self.resource_left = resource_left
         self.task_right = task_right
         self.resource_right = resource_right
         self.offset = offset
-        self.comp_operator = '<'
+        self.comp_operator = None
 
     def tasks(self):
-        return [self.task_left,self.task_right]
+        return [self.task_left, self.task_right]
 
     def __repr__(self):
         s = str(self.task_left)
@@ -1008,16 +1013,13 @@ class _Precedence(_Constraint):
     def __str__(self):
         return self.__repr__()
 
-    def __hash__(self):
-        return self.__repr__().__hash__()
-
 
 class PrecedenceLax(_Precedence):
     """
     A precedence of the form T1 + 3 < T2
     """
     def __init__(self,task_left,resource_left,task_right,resource_right,offset=0):
-        _Precedence.__init__(self,task_left,resource_left,task_right,resource_right,offset)
+        super().__init__(task_left,resource_left,task_right,resource_right,offset)
         self.comp_operator = '<'
 
 
@@ -1026,7 +1028,7 @@ class PrecedenceTight(_Precedence):
     A precedence of the form T1 + 3 <= T2
     """
     def __init__(self,task_left,resource_left,task_right,resource_right,offset=0):
-        _Precedence.__init__(self,task_left,resource_left,task_right,resource_right,offset)
+        super().__init__(task_left,resource_left,task_right,resource_right,offset)
         self.comp_operator = '<='
 
 
@@ -1035,7 +1037,7 @@ class PrecedenceCond(_Precedence):
     A precedence of the form T1 + 3 << T2
     """
     def __init__(self,task_left,resource_left,task_right,resource_right,offset=0):
-        _Precedence.__init__(self,task_left,resource_left,task_right,resource_right,offset)
+        super().__init__(task_left,resource_left,task_right,resource_right,offset)
         self.comp_operator = '<<'
 
 
@@ -1044,7 +1046,7 @@ class Resource(_SchedElement):
     A resource which can processes tasks
     """
     def __init__(self,name=None,size=1,group=None,periods=None,cost_per_period=None,**kwargs):
-        _SchedElement.__init__(self,name)
+        super().__init__(name)
         self.size = size
         self.group = group
         self.periods = periods
@@ -1074,7 +1076,7 @@ class Resource(_SchedElement):
 
 class _ResourceAffine(_SchedElementAffine):
     def __init__(self,unknown=None):
-        _SchedElementAffine.__init__(self,unknown=unknown,affine_operator='|')
+        super().__init__(unknown=unknown,affine_operator='|')
 
     def __or__(self,other):
         return super(_ResourceAffine,self).__add__(_ResourceAffine(other)) #add of superclass
@@ -1084,9 +1086,6 @@ class _ResourceAffine(_SchedElementAffine):
 
     def __repr__(self):
         return self.__str__()
-
-    def __hash__(self):
-        return self.__repr__().__hash__()
 
 
 class _Slices(_List):
@@ -1120,7 +1119,7 @@ class _Slices(_List):
 
 class _Slice(_SchedElement):
     def __init__(self,resource):
-        _SchedElement.__init__(self)
+        super().__init__()
         self.resource = resource
         self._param = 'length'
         self._start = None
@@ -1247,7 +1246,7 @@ class _SliceAffine(_SchedElementAffine):
     linear combination of resource slices to be turned into a capacity contraint
     """
     def __init__(self,unknown=None):
-        _SchedElementAffine.__init__(self,unknown=unknown,affine_operator='+')
+        super().__init__(unknown=unknown,affine_operator='+')
 
     def _get_cap(self,SLA):
         SLA_ = SLA.copy()
@@ -1282,16 +1281,13 @@ class _SliceAffine(_SchedElementAffine):
     def __repr__(self):
         return self.__str__()
 
-    def __hash__(self):
-        return self.__repr__().__hash__()
-
 
 class Capacity(_Constraint):
     """
     A capacity constraint
     """
     def __init__(self,SLA,bound):
-        _Constraint.__init__(self)
+        super().__init__()
         self.SLA = SLA
         self.bound = bound
 
@@ -1316,6 +1312,3 @@ class Capacity(_Constraint):
 
     def __repr__(self):
         return self.__str__()
-
-    def __hash__(self):
-        return self.__repr__().__hash__()
