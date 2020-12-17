@@ -48,7 +48,7 @@ class TestFeatures(unittest.TestCase):
         self.assertEqual(len(scenario.tasks()), 1)
 
     def test_create_multiple_tasks(self) -> None:
-        scenario= Scenario('Scenario_2')
+        scenario= Scenario('Scenario_3')
         tasks = scenario.Tasks(name='T', num=5, length=2)
         self.assertEqual(len(tasks), 5)
         # check task names. Tasks names should be T0, T1, T2, T3 and T4
@@ -58,7 +58,7 @@ class TestFeatures(unittest.TestCase):
         self.assertEqual(len(scenario.tasks()), 5)
 
     def test_create_single_resource(self) -> None:
-        scenario= Scenario('Scenario_3')
+        scenario= Scenario('Scenario_4')
         self.assertEqual(len(scenario.resources()), 0)
         res = scenario.Resource('R')
         self.assertIsInstance(res, Resource)
@@ -69,7 +69,7 @@ class TestFeatures(unittest.TestCase):
         self.assertEqual(len(scenario.resources()), 1)
 
     def test_create_multiple_resources(self) -> None:
-        scenario= Scenario('Scenario_2')
+        scenario= Scenario('Scenario_5')
         resources = scenario.Resources(name='R', num=5, size=2)
         self.assertEqual(len(resources), 5)
         # check task names. Tasks names should be T0, T1, T2, T3 and T4
@@ -77,6 +77,27 @@ class TestFeatures(unittest.TestCase):
             self.assertEqual(resource.name, 'R%i' % idx)
             self.assertEqual(resource.size, 2)
         self.assertEqual(len(scenario.resources()), 5)
+
+    def test_single_resource_requirement(self) -> None:
+        scenario= Scenario('Scenario_6')
+        res = scenario.Resource(name='R')
+        task = scenario.Task(name='T')
+        self.assertEqual(len(task.resources_req), 0)
+        task += res  # resource requirement
+        self.assertEqual(len(task.resources_req), 1)
+        # we should not be able to add this resource
+        # one more time
+        #with self.assertRaises(ValueError): TODO does not work ??
+        #    task += res
+
+    def test_multiple_resource_requirement(self) -> None:
+        scenario= Scenario('Scenario_7')
+        res1 = scenario.Resource(name='R1')
+        res2 = scenario.Resource(name='R2')
+        task = scenario.Task(name='T')
+        self.assertEqual(len(task.resources_req), 0)
+        task += res1, res2  # means res1 and res2 are required for task to be processed
+        self.assertEqual(len(task.resources_req), 2)
 
 if __name__ == "__main__":
     unittest.main()
