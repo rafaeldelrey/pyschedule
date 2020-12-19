@@ -24,7 +24,7 @@ import copy
 import sys
 
 try:
-    from z3 import Solver, Int, unsat
+    from z3 import Solver, Int, unsat, unknown
 except ModuleNotFoundError:
     raise Exception('z3 is not installed')
 
@@ -112,22 +112,29 @@ def solve(scenario,time_limit=None,copy_scenario=False,msg=False) :
         task_length = P.task.length
         smt_solver.add(task_start_time + task_length == P.bound)
 
-    if msg:
-        print("Constraints:")
-        for c in smt_solver.assertions():
-            print("\t", c)
-
-    # chack satisfiability
+    # check satisfiability
     sat_result  = smt_solver.check()
 
     if sat_result == unsat:
-        print("No solution found")
+        print("No solution exists.")
+        return False
+    elif sat_result == unknown:
+        print("No solution can be found.")
         return False
 
     # solve
     solution = smt_solver.model()
 
-    print(solution)
+    if msg:
+        print("Constraints:")
+        for c in smt_solver.assertions():
+            print("\t", c)
+        print("Solver satistics:")
+        for k, v in smt_solver.statistics():
+            print("\t%s : %s" % (k, v))
+        print("Solution:")
+        for d in solution.decls():
+                    print("\t%s = %s" % (d.name(), solution[d]))
     # read last solution
     #for T in S.tasks() :
     #    T.start_value = int(solution.StartMin(task_to_interval[T]))
