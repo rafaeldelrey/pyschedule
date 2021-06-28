@@ -20,7 +20,7 @@
 from datetime import datetime, timedelta
 
 def plot(scenario, hide_tasks=[], hide_resources=[],
-         date_init=None, delta_t=None, data_type='Resource'):
+         date_init=None, delta_t=None, data_type='Resource', **kwargs):
     """
     Plot the given solved scenario using matplotlib
 
@@ -70,6 +70,6 @@ def plot(scenario, hide_tasks=[], hide_resources=[],
     if data_type == 'Task':
         color_data = 'Resource'
 
-    fig = px.timeline(df, x_start="Start", x_end="Finish", y=data_type, color=color_data)
+    fig = px.timeline(df, x_start="Start", x_end="Finish", y=data_type, color=color_data, **kwargs)
     fig.update_yaxes(autorange="reversed")
     fig.show()
