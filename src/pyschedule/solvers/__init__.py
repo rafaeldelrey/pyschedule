@@ -32,4 +32,3 @@ from . import mip
 from . import mip_bigm
 from . import ortools_cp_sat
 from . import listsched
-from . import z3_smt
